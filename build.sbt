@@ -5,6 +5,6 @@ lazy val root = (project in file(".")).
       scalaVersion := "2.11.8",
       version      := "0.1.0-SNAPSHOT"
     )),
-    name := "kkehive",
+    name := "keehive",
     assemblyJarName in assembly := "keehive.jar"
   )

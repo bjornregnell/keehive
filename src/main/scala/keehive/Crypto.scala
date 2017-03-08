@@ -59,7 +59,7 @@ object Crypto {
     import javax.crypto.spec.SecretKeySpec
     import javax.crypto.{Cipher, SealedObject}
 
-    private val (algorithm, keyLength) = ("AES", 128)
+    val (algorithm, keyLength) = ("AES", 128)
 
     private def keySpec(password: String): SecretKeySpec = {
       val key = SHA.sha.digest(Base64.encodeToBytes(password)).take(keyLength/8)

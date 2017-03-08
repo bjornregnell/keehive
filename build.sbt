@@ -1,10 +1,11 @@
+lazy val appname = "keehive"
+lazy val versnum = "0.1.0"
+
 lazy val root = (project in file(".")).
   settings(
-    inThisBuild(List(
-      organization := "se.bjornregnell",
-      scalaVersion := "2.11.8",
-      version      := "0.1.0-SNAPSHOT"
-    )),
-    name := "keehive",
-    assemblyJarName in assembly := "keehive.jar"
+    organization := "se.bjornregnell",
+    scalaVersion := "2.11.8",
+    version      := s"$versnum-SNAPSHOT",
+    name := appname,
+    assemblyJarName in assembly := s"$appname-0.1.0.jar"
   )

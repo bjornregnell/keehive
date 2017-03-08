@@ -3,7 +3,7 @@ package keehive
 object AppController {
   val welcomeBanner = s"""
     |***********************************************
-    |***          WELCOME TO keehive!           ***
+    |***          WELCOME TO keehive!            ***
     |***  keehive is a terminal password manager ***
     |***    PROTECT YOUR KEYBOARD FROM PEEKERS!  ***
     |***           Type '?' for help             ***

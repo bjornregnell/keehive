@@ -2,13 +2,15 @@ package keehive
 
 object AppController {
   val welcomeBanner = s"""
-    |***********************************************
-    |***          WELCOME TO keehive!            ***
-    |***  keehive is a terminal password manager ***
-    |***    PROTECT YOUR KEYBOARD FROM PEEKERS!  ***
-    |***           Type '?' for help             ***
-    |***        Press TAB for completion         ***
-    |***********************************************
+    |*************************************************
+    |            WELCOME TO keehive!
+    |                version ${Main.version}
+    |     keehive is a terminal password manager
+    |       PROTECT YOUR KEYBOARD FROM PEEKERS!
+    |              Type '?' for help
+    |           Press TAB for completion
+    |  Built with Scala ${util.Properties.versionNumberString} running Java ${System.getProperty("java.version")}
+    |*************************************************
     """.stripMargin
 
   val helpText = s"""
@@ -50,6 +52,7 @@ object AppController {
 
   def start(nonDefaultPath: String = ""): Unit  = {
     println(welcomeBanner)
+    cmdLoop()
   }
 
   case class Cmd(cmd: String, exec: String => Unit, helpMsg: String= "")

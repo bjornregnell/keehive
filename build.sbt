@@ -1,5 +1,5 @@
 lazy val appname = "keehive"
-lazy val versnum = "0.1.0"
+lazy val versnum = "0.2"
 
 lazy val root = (project in file(".")).
   settings(
@@ -7,5 +7,5 @@ lazy val root = (project in file(".")).
     scalaVersion := "2.11.8",
     version      := s"$versnum-SNAPSHOT",
     name := appname,
-    assemblyJarName in assembly := s"$appname-0.1.0.jar"
+    assemblyJarName in assembly := s"$appname-$versnum.jar"
   )

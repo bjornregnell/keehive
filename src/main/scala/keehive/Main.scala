@@ -1,6 +1,7 @@
 package keehive
 
 object Main {
+  val version = "0.2" 
   val helpArgs: Set[String] = Set("-h", "?", "--help", "-help", "help")
   val usageHelpMsg: String = s"usage: java -jar keehive.jar [pathToVaultDir]"
 

@@ -1,4 +1,4 @@
-package sesam
+package keehive
 
 object Clipboard {
   def put(s: String): Unit = {

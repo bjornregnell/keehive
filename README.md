@@ -109,7 +109,7 @@ java.lang.NoSuchMethodError: jline.console.ConsoleReader.readLine(Ljava/lang/Str
 * This is how to pull changes from upstream to your fork with git commands in the terminal: https://help.github.com/articles/syncing-a-fork/
 
 * If you install a git GUI client, you can keep your fork in synch with the upstream repo by a single click in the GUI:
- - For Linux: https://www.gitkraken.com/
+ - For Linux, Windows and MacOS: https://www.gitkraken.com/
  - For Windows and MacOS: https://desktop.github.com/
 
  * Before you change locally, make sure your fork is in synch (see above). Frequently do `git pull` or synch using a git GUI client.

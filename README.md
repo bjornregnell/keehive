@@ -77,4 +77,5 @@ Do this to build keehive:
 2. Build the jar-file: `sbt assembly`
 
 3. Run the jar-file: `source run.sh`
-git psuh
+
+## How to contribute?

@@ -63,7 +63,7 @@ xport     export all records to clipboard as plain tex
 ```
 
 
-# How to build?
+## How to build?
 
 * You need `sbt` on your path; if you don't have it then first [install sbt]()
   - to manually compile the files, then you need `scalac` on your path (but if you install sbt this is not needed) [download and install Scala 2.11.8](http://scala-lang.org/download/2.11.8.html)
@@ -77,3 +77,4 @@ Do this to build keehive:
 2. Build the jar-file: `sbt assembly`
 
 3. Run the jar-file: `source run.sh`
+git psuh

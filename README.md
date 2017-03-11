@@ -68,7 +68,7 @@ xport     export all records to clipboard as plain tex
 * You need `sbt` on your path; if you don't have it then first [install sbt]()
   - to manually compile the files, then you need `scalac` on your path (but if you install sbt this is not needed) [download and install Scala 2.11.8](http://scala-lang.org/download/2.11.8.html)
 
-* You need `git` on your path to clone this repo; if you don't have it then first [install git]() otherwise just download the repo as a zip-file.
+* You need `git` on your path to clone this repo; if you don't have it then first [install git](). Otherwise just download the repo as a [zip-file](https://github.com/bjornregnell/keehive/archive/master.zip) and unpack.
 
 Do this to build keehive:
 

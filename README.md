@@ -65,7 +65,7 @@ xport     export all records to clipboard as plain tex
 
 ## How to build?
 
-* You need `sbt` on your path; if you don't have it then first [install sbt]()
+* The easy way to build keehive is to use `sbt`; if you don't have it then first [install sbt]()
   - to manually compile the files, then you need `scalac` on your path (but if you install sbt this is not needed) [download and install Scala 2.11.8](http://scala-lang.org/download/2.11.8.html)
 
 * You need `git` on your path to clone this repo; if you don't have it then first [install git](). Otherwise just download the repo as a [zip-file](https://github.com/bjornregnell/keehive/archive/master.zip) and unpack.
@@ -78,4 +78,77 @@ Do this to build keehive:
 
 3. Run the jar-file: `source run.sh`
 
-## How to contribute?
+As keehive uses a more recent version of jline than sbt, it does not work to start the app with `sbt run`, which will give the error below; therefor launch keehive using `source run.sh` or `java -jar target/scala-2.11/keehive-x.y.jar` instead.
+```
+[error] (run-main-0) java.lang.NoSuchMethodError: jline.console.ConsoleReader.readLine(Ljava/lang/String;Ljava/lang/Character;Ljava/lang/String;)Ljava/lang/String;
+java.lang.NoSuchMethodError: jline.console.ConsoleReader.readLine(Ljava/lang/String;Ljava/lang/Character;Ljava/lang/String;)Ljava/lang/String;
+	at keehive.Terminal$.get(Terminal.scala:11)
+	at keehive.AppController$.cmdLoop(AppController.scala:71)
+	at keehive.AppController$.start(AppController.scala:65)
+	at keehive.Main$.main(Main.scala:11)
+	at keehive.Main.main(Main.scala)
+
+```
+
+## How to contribute to keehive?
+
+### Fork and clone
+
+* Learn the basics about git, especially the "Getting Started" and "Git Basics" sections in this book: https://git-scm.com/book/en/v2
+
+* Get an account at github if you don't have one already. Recommended user name if in doubt: `firstnamefamilyname` with no capital letters and no hyphens.
+
+* Install git: https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
+
+* Make a **fork** of this repo in GitHub to your own GitHub account: https://help.github.com/articles/fork-a-repo/
+
+* **Clone** your fork to your local computer: https://help.github.com/articles/cloning-a-repository/
+
+### Keep your fork in synch
+
+* This is how to pull changes from upstream to your fork with git commands in the terminal: https://help.github.com/articles/syncing-a-fork/
+
+* If you install a git GUI client, you can keep your fork in synch with the upstream repo by a single click in the GUI:
+ - For Linux: https://www.gitkraken.com/
+ - For Windows and MacOS: https://desktop.github.com/
+
+ * Before you change locally, make sure your fork is in synch (see above). Frequently do `git pull` or synch using a git GUI client.
+
+
+### Making contributions
+
+* If you find a minor issue that is straight-forward to fix you are very welcome to create a pull request directly as explained below. But if your contribution is more significant you should open an issue first and start a discussion about your proposal. In the latter case, click the issue tab at the top of this page.
+
+* You must check that your contribution compile and run without errors before you commit.
+
+* Whenever you are ready with an incremental change, do `git commit -m "msg"` and then `git push`, or commit and synch in a git GUI client. Think *carefully* about your commit message, as discussed in the next section.
+
+* When you are ready with a complete, atomic contribution that is good enough to be incorporated in upstream, then create a pull request: https://help.github.com/articles/creating-a-pull-request/
+
+* Keep your pull requests minimal and coherent to create a small change sets that will be easy to merge as a single unit. Don't pack a lot of unrelated changes in the same pull request.
+
+
+### Writing commit messages
+
+* Write concise and informative [commit messages](http://chris.beams.io/posts/git-commit/) that explains why the commit was made.
+
+* Start each commit message with a direct verb, preferably one of the following:
+  * `add` when you have created new stuff that was not there before
+  * `update` when you have changed existing stuff
+  * `fix` when you have corrected a bug or fixed a typo etc.
+  * `remove` when you have removed stuff
+  * `rename` when you have renamed files or other stuff without changing appearance/meaning
+  * `refactor` when you have changed things structurally but not changed actual appearance/meaning
+
+* Make small commits and commit often. Try to keep commits atomic and only within one file if meaningful.
+
+* Make sure your change compiles before committing. Do *not* push code that does not compile!
+
+
+### Coding style
+
+Pragmatically follow these style guides:
+
+* Scala style:
+  * The Scala style guide: http://docs.scala-lang.org/style/
+  * A Scala best practice guide: https://github.com/alexandru/scala-best-practices

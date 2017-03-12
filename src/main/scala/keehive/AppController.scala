@@ -147,7 +147,7 @@ object AppController {
 
   private var enteredMasterPassword: String = _
   private var vault: Vault = _
-  private var path: String = s"${Disk.userDir}/.keehive/"
+  private var path: String = s"${Disk.userDir}/keehive/"
 
   // ----------------- utilities --------------------------------------
 

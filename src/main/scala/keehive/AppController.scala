@@ -133,10 +133,10 @@ object AppController {
 
   def notifyMpwCreated(): Unit = Terminal.put("New master password file created.")
   def notifyMpwGood(): Unit = Terminal.put("Master password ok: keehive is open!")
-  def abortMpwBad(): Unit = Main.abort("Bad master password :( ACCESS DENIED!")
 
   def notifySaveVault(n: Int): Unit = Terminal.put(s"Saving $n secrets in vault.")
   def notifyCreateVault(): Unit = Terminal.put("Creating new empty vault.")
+  def abortMpwBad(): Unit = Main.abort("Bad master password :( ACCESS DENIED!")
   def notifyIdExists(): Unit = Terminal.put(s"That $Id already exists; pick another.")
   def notifyRecordNotFound(): Unit = Terminal.put(s"That record does not exists.")
   def notifyIndexNotFound(): Unit = Terminal.put(s"Index out of bounds.")

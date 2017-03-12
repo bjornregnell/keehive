@@ -1,7 +1,7 @@
 package keehive
 
 object Main {
-  val version = "0.2" 
+  val version = "0.3"
   val helpArgs: Set[String] = Set("-h", "?", "--help", "-help", "help")
   val usageHelpMsg: String = s"usage: java -jar keehive.jar [pathToVaultDir]"
 
@@ -14,4 +14,5 @@ object Main {
   def quit(msg: String = "Goodbye!"): Unit = { println(msg); sys.exit(0) }
 
   def abort(errMsg: String): Unit = { println(s"Error: $errMsg"); sys.exit(1) }
+
 }

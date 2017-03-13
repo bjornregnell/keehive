@@ -218,8 +218,9 @@ object AppController {
   def fixLine(line: String): String =
     if (line contains ':') line
     else {
-      Terminal.put(s"\n*** [warn] adding random fieldname; missing colon in line:\n$line\n")
-      s"?${randomStr()}: $line"
+      val r = randomStr()
+      Terminal.put(s"\n*** [warn] random fieldname ?$r added as colon is missing in line:\n$line\n")
+      s"?$r: $line"
     }
 
   def fixPair(s: String): (String, String) = {
@@ -235,11 +236,7 @@ object AppController {
     }.toMap
     def kvsWithId =
       if (!kvs.isDefinedAt(Id)) kvs + (Id -> randomStr()) else kvs
-    if (kvs.size > 0) {
-      val parsed = kvsWithId
-      Terminal.put(parsed.map{case (k ,v) => s"$k:$v"}.mkString("\n","\n",""))
-      Some(Secret(parsed))
-    } else None
+    if (kvs.size > 0) Some(Secret(kvsWithId)) else None
   }
 
   // ----------------- commands ---------------------------------------
@@ -348,9 +345,9 @@ object AppController {
   def importFromClipboard(): Unit = {
     val items = Clipboard.get.split("\n\n").toSeq
     val fields = items.filterNot(_.isEmpty).flatMap(parseFields)
-    Terminal.put(fields.map(showAllFields).mkString("","\n\n","\n"))
+    Terminal.put(fields.map(_.get("id")).mkString(", "))
     val size =
-      if (Terminal.isOk("Do you want to import the above records?")) {
+      if (Terminal.isOk("Do you want to append the above records to your vault?")) {
         vault.add(fields:_*)
         setCompletions()
       } else 0

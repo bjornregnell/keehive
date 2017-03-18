@@ -10,12 +10,21 @@ object Download {
     try pw.write(s) finally pw.close
   }
 
-  def printBytesWritten(n: Long): Unit = {
+  def printBytesWriting(n: Long): Unit = {
     val s = s"$n bytes written"
     print(s + {"\b" * s.length})
   }
 
-  def toBinaryFile(url: String, fileName: String, onWrite: Long => Unit = printBytesWritten, bufSize: Int = 4096): Unit = {
+  def printBytesWritten(n: Long): Unit = {
+    println(s"$n bytes written. Download ready!")
+  }
+
+
+  def toBinaryFile( url: String,
+                    fileName: String,
+                    onWrite: Long => Unit = printBytesWriting,
+                    onReady: Long => Unit = printBytesWritten,
+                    bufSize: Int = 4096): Unit = {
     val file = new java.io.File(fileName)
     val output = new java.io.FileOutputStream(file)
     try {
@@ -30,6 +39,7 @@ object Download {
           n = input.read(buffer)
           tot = tot + n
       }
+      onReady(tot)
     } finally output.close
   }
 }

@@ -1,19 +1,31 @@
 package keehive
 
 object AppController {
-  val welcomeBanner = s"""
-    |*************************************************
-    |            WELCOME TO keehive!
-    |                version ${Main.version}
-    |     keehive is a terminal password manager
-    |       PROTECT YOUR KEYBOARD FROM PEEKERS!
-    |              Type '?' for help
-    |           Press TAB for completion
-    |  Built with Scala ${util.Properties.versionNumberString} running Java ${System.getProperty("java.version")}
-    |*************************************************
+  val welcomeBanner = raw"""
+    |*************************************
+    |   _             _     _
+    |  | |           | |   (_)
+    |  | | _____  ___| |__  ___   _____
+    |  | |/ / _ \/ _ \ '_ \| \ \ / / _ \
+    |  |   <  __/  __/ | | | |\ V /  __/
+    |  |_|\_\___|\___|_| |_|_| \_/ \___|
+    |
+    | Welcome to keehive v${Main.version}
+    | ${Main.GithubUrl}
+    |
+    | Type ? and press Enter for help.
+    | Press TAB for completion.
+    | Press Ctrl+L to clear screen.
+    |
+    | Built with Scala ${util.Properties.versionNumberString}
+    | Running Java ${System.getProperty("java.version")}
+    |
+    |*************************************
     """.stripMargin
 
   val helpText = s"""
+    |keehive is a terminal password manager
+    |
     |Press TAB for completion of these commands (alphabetical order):
     |
     |add       add a new record, enter each field after prompt
@@ -22,7 +34,7 @@ object AppController {
     |copy s    copy password of record with id starting with s
     |          example: c<TAB> s<TAB>      copy password of id starting with s
     |copy s f  copy field f of record with id starting with s
-    |          example: c<TAB> myid url    copy the url field of id:myid
+    |          example: c<TAB> someId url    copy the url field of someId
     |
     |del 42    delete the record at index 42
     |del id    delete the record with id
@@ -33,31 +45,32 @@ object AppController {
     |
     |help      show this message; also ?
     |
+    |import    import records from clipboard
+    |
     |list      list all records, hide password
-    |list 42   list fileds of record with index 42, hide password
+    |list 42   list fields of record with index 42, hide password
     |list s    list fields of record with id that starts with s, hide password
     |
     |quit      quit keehive; also Ctrl+D
     |
     |show      list all records, show password
-    |show 42   list fileds of record with index 42, show password
+    |show 42   list fields of record with index 42, show password
     |show s    list fields of record with id that starts with s, show password
     |
     |xport     export all records to clipboard as plain tex
     """.stripMargin
 
   val cmdPrompt     = "\nkeehive> "
-  val mpwPrompt     = "Enter secure master password: "
+  val mpwPrompt     = "Enter master password: "
 
   // --------------- Command Control ----------------------
 
-  def start(nonDefaultPath: String = ""): Unit  = {
-    if (!nonDefaultPath.isEmpty) path = nonDefaultPath
+  def start(): Unit  = {
     Terminal.put(welcomeBanner)
-    Terminal.put(s"Your current keehive directory: $canonicalPath\n")
+    Terminal.put(s"Vault directory: $canonicalPath\n")
     enteredMasterPassword = Terminal.getSecret(mpwPrompt)
 
-    val Vault.Result(vaultOpt, isCreated) = Vault.open(enteredMasterPassword, path)
+    val Vault.Result(vaultOpt, isCreated) = Vault.open(enteredMasterPassword, Main.path)
     if (vaultOpt.isDefined) {
       vault = vaultOpt.get
       if (isCreated) notifyMpwCreated() else notifyMpwGood()
@@ -132,8 +145,7 @@ object AppController {
   // ---------------  Notifications to user ----------------------------
 
   def notifyMpwCreated(): Unit = Terminal.put("New master password file created.")
-  def notifyMpwGood(): Unit = Terminal.put("Master password ok: keehive is open!")
-
+  def notifyMpwGood(): Unit = Terminal.put("Your vault is open!")
   def notifySaveVault(n: Int): Unit = Terminal.put(s"Saving $n secrets in vault.")
   def notifyCreateVault(): Unit = Terminal.put("Creating new empty vault.")
   def abortMpwBad(): Unit = Main.abort("Bad master password :( ACCESS DENIED!")
@@ -147,11 +159,10 @@ object AppController {
 
   private var enteredMasterPassword: String = _
   private var vault: Vault = _
-  private var path: String = s"${Disk.userDir}/keehive/"
 
   // ----------------- utilities --------------------------------------
 
-  def canonicalPath = new java.io.File(path).getCanonicalPath
+  def canonicalPath: String  = new java.io.File(Main.path).getCanonicalPath()
 
   def randomStr(n: Int = 8): String = java.util.UUID.randomUUID().toString.take(n)
   def randomId(): String = {
@@ -177,13 +188,13 @@ object AppController {
   def showRecordById(id: String, fieldsToExclude: Seq[String]): Unit = {
     val i = vault.indexStartsWith(field = Id, valueStartsWith = id)
     if (i >= 0) Terminal.put(vault(i).showLines(FieldsInOrder, fieldsToExclude))
-    else notifyRecordNotFound
+    else notifyRecordNotFound()
   }
 
   def showRecordByIndex(ix: Int, fieldsToExclude: Seq[String]): Unit =
     if (ix >= 0 && ix < vault.size)
       Terminal.put(vault(ix).showLines(FieldsInOrder, fieldsToExclude))
-    else notifyIndexNotFound
+    else notifyIndexNotFound()
 
   def listRange(fromIndex: Int, untilIndex: Int, fieldsToExclude: Seq[String]): Unit =
     for (i <- fromIndex until untilIndex) {
@@ -219,7 +230,7 @@ object AppController {
     if (line contains ':') line
     else {
       val r = randomStr()
-      Terminal.put(s"\n*** [warn] random fieldname ?$r added as colon is missing in line:\n$line\n")
+      Terminal.put(s"\n*** [warn] random field name ?$r added as colon is missing in line:\n$line\n")
       s"?$r: $line"
     }
 
@@ -234,16 +245,15 @@ object AppController {
     val kvs: Map[String, String] = xs.map(fixPair).collect {
       case (k,v) if !v.isEmpty => (k.trim,v.trim)
     }.toMap
-    def kvsWithId =
-      if (!kvs.isDefinedAt(Id)) kvs + (Id -> randomStr()) else kvs
-    if (kvs.size > 0) Some(Secret(kvsWithId)) else None
+    def kvsWithId = if (!kvs.isDefinedAt(Id)) kvs + (Id -> randomStr()) else kvs
+    if (kvs.nonEmpty) Some(Secret(kvsWithId)) else None
   }
 
   // ----------------- commands ---------------------------------------
 
   def addRecord(arg: String): Unit = {
     val args = splitArg(arg)
-    val idMaybe = if (args.size > 0) args(0) else Terminal.get(Id + ": ")
+    val idMaybe = if (args.nonEmpty) args(0) else Terminal.get(Id + ": ")
     val id = idMaybe.takeWhile(_ != ' ')
     if (id != idMaybe) notifyIdMustBeOneWord()
     else if (isInt(id)) notifyIdCannotBeInteger()
@@ -268,6 +278,17 @@ object AppController {
             vault.remove(i)
             setCompletions()
             Terminal.put(s"Record at old index [$i] removed.")
+          } else Terminal.put(s"Delete aborted.")
+        } else notifyIndexNotFound
+
+      case Seq(ix1, ix2) if isInt(ix1) && isInt(ix2) =>
+        val (start, end) = (ix1.toInt, ix2.toInt)
+        if (start >= 0 && start < vault.size && end > start && end < vault.size) {
+          val n = end - start + 1
+          if (Terminal.isOk(s"Are you shure that you want to delete $n records at [$start-$end]")) {
+            vault.remove(start, n)
+            setCompletions()
+            Terminal.put(s"Record at old indices [$start-$end] removed.")
           } else Terminal.put(s"Delete aborted.")
         } else notifyIndexNotFound
 
@@ -342,16 +363,36 @@ object AppController {
     Terminal.put(vault.size + " records copied to clipboard.")
   }
 
+  def checkForDuplicates(fields: Seq[Secret] ): Seq[Secret] = {
+    val newIds = fields.toSet[Secret].map(s => s.get(Id))
+    val existingIds = vault.toSet.map(s => s.get(Id))
+    val duplicates = newIds intersect existingIds
+    if (duplicates.size > 0) {
+      Terminal.put("\n *** WARNING! Duplicate ids detected: " + duplicates.mkString(", "))
+      if (Terminal.isOk("Do you want to remove all these ids in vault before importing?")) {
+        vault.removeValuesOfField(duplicates.toSeq, Id)
+      } else Terminal.put("Duplicates kept in vault.")
+    }
+    val pairs = fields.map(s => (s.get(Id), s))
+    val distinctPairs = pairs.toMap.toSeq
+    if (pairs.size != distinctPairs.size) {
+      if (Terminal.isOk("Duplicates among import detected. Keep last in sequence?"))
+        distinctPairs.map(_._2)
+      else fields
+    } else fields
+
+  }
+
   def importFromClipboard(): Unit = {
     val items = Clipboard.get.split("\n\n").toSeq
     val fields = items.filterNot(_.isEmpty).flatMap(parseFields)
+    val n = fields.size
     Terminal.put(fields.map(_.get("id")).mkString(", "))
-    val size =
-      if (Terminal.isOk("Do you want to append the above records to your vault?")) {
-        vault.add(fields:_*)
-        setCompletions()
-      } else 0
-    Terminal.put(s"Appended $size records.")
+    if (Terminal.isOk(s"Do you want to append the $n records to your vault?")) {
+      val fieldsToAppend = checkForDuplicates(fields)
+      setCompletions()
+      vault.add(fieldsToAppend:_*)
+    }
   }
 
 }

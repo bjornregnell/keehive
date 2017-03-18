@@ -81,7 +81,8 @@ class Vault private (
     }
   }
 
-  def toVector = secrets.toVector
+  def toVector: Vector[Secret] = secrets.toVector
+  def toSet: Set[Secret] = secrets.toSet
   def apply(index: Int): Secret = secrets(index)
   def size: Int = secrets.size
   def valuesOf(field: String): Seq[String] = secrets.map(s => s.get(field))
@@ -104,8 +105,19 @@ class Vault private (
     saveSecrets(secrets)
   }
 
-  def remove(index: Int): Unit = {
-    secrets.remove(index)
+  def remove(index: Int, n: Int = 1): Unit = {
+    secrets.remove(index, n)
+    saveSecrets(secrets)
+  }
+
+  def removeValuesOfField(values: Seq[String], field: String): Unit = {
+    values.foreach{ v =>
+      var i = indexWhere(field, v)
+      while (i >= 0) {
+        secrets.remove(i)
+        i = indexWhere(field, v)
+      }
+    }
     saveSecrets(secrets)
   }
 

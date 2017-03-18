@@ -16,6 +16,9 @@ project/plugins/project/
 .scala_dependencies
 .worksheet
 
+# IntelliJ specific
+.idea
+
 # ensime specific
 .classpath
 .ensime

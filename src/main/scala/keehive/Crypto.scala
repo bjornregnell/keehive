@@ -1,5 +1,7 @@
 package keehive
 
+import java.security.MessageDigest
+
 object Crypto {
   import scala.util.Try
 
@@ -21,7 +23,7 @@ object Crypto {
     val rnd = new java.security.SecureRandom
     val saltLength = 32
     def next: String = {
-      var xs = new Array[Byte](saltLength)
+      val xs = new Array[Byte](saltLength)
       rnd.nextBytes(xs)
       Base64.encodeToString(xs)
     }
@@ -30,7 +32,7 @@ object Crypto {
   object Bytes {
     def toObject[T](bytes: Array[Byte]): T = {
       val bis = new java.io.ByteArrayInputStream(bytes)
-      var ois = new java.io.ObjectInputStream(bis)
+      val ois = new java.io.ObjectInputStream(bis)
       try ois.readObject.asInstanceOf[T] finally ois.close
     }
 
@@ -46,12 +48,12 @@ object Crypto {
 
   object SHA {
     val algorithm = "SHA-512"
-    val sha = java.security.MessageDigest.getInstance(algorithm)
+    private[Crypto] val instance = java.security.MessageDigest.getInstance(algorithm)
 
     def hash(s: String): String =
-      Base64.encodeToString(sha.digest(Base64.encodeToBytes(s)))
+      Base64.encodeToString(instance.digest(Base64.encodeToBytes(s)))
 
-    def isValidPassword(password: String, salt: String, saltedHash: String) =
+    def isValidPassword(password: String, salt: String, saltedHash: String): Boolean =
       hash(password + salt) == saltedHash
   }
 
@@ -62,7 +64,7 @@ object Crypto {
     val (algorithm, keyLength) = ("AES", 128)
 
     private def keySpec(password: String): SecretKeySpec = {
-      val key = SHA.sha.digest(Base64.encodeToBytes(password)).take(keyLength/8)
+      val key = SHA.instance.digest(Base64.encodeToBytes(password)).take(keyLength/8)
       new SecretKeySpec(key, algorithm)
     }
 

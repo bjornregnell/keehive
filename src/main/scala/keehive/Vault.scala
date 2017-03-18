@@ -2,7 +2,7 @@ package keehive
 
 object Vault {
   case class Master(salt: String = "", saltedHash: String = "")
-  val username = System.getProperty("user.name")
+  val username: String = System.getProperty("user.name")
   final val mpwFileName   = s"$username-mpw.txt"
   final val vaultFileName = s"$username-vlt.txt"
 
@@ -41,7 +41,7 @@ object Vault {
     if (isValid) {
       val vault = new Vault(masterPassword, mpwFile, vaultFile, salt)
       Result(Some(vault), isCreated)
-    } else Result(None, false)
+    } else Result(None, isCreated = false)
   }
 }
 
@@ -69,7 +69,7 @@ class Vault private (
     if (Disk.isExisting(vaultFile)) {
       val encrypted = Disk.loadString(vaultFile)
       val secretsOpt: Option[Secrets] = Crypto.AES.decryptObjectFromString(encrypted, key)
-      if (!secretsOpt.isDefined)
+      if (secretsOpt.isEmpty)
         Main.abort("Inconsistency between master password and encrypted vault!")
       Terminal.put(s"Loaded ${secretsOpt.get.size} secrets.")
       secretsOpt.get

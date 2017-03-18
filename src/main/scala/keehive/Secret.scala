@@ -28,7 +28,7 @@ case class Secret private (
   def show(firstKeys: Seq[String], excludeKeys: Seq[String], padFirstTo: Int = 15 ): String = {
     val kvs = select(firstKeys, excludeKeys)
     val xs = kvs.map{ case (k,v)  => s"$k:$v" }
-    val padded = if (xs.size > 0) xs.updated(0, xs(0).padTo(padFirstTo, ' ')) else xs
+    val padded = if (xs.nonEmpty) xs.updated(0, xs.head.padTo(padFirstTo, ' ')) else xs
     padded.mkString(" ")
   }
 

@@ -112,7 +112,7 @@ object AppController {
   lazy val helpLines = helpText.split('\n').toSeq
   def helpCmd(cmd: String): String = {
     val initDropped = helpLines.dropWhile(line => !line.startsWith(cmd))
-    helpLines.takeWhile(line => line.startsWith(cmd)).mkString("\n")
+    initDropped.takeWhile(line => line.startsWith(cmd)).mkString("\n")
   }
 
   def splitArg(arg: String): Seq[String] =
@@ -120,11 +120,11 @@ object AppController {
 
   def help(arg: String = ""): Unit =
     if (arg == "") Terminal.put(helpText)
-    else splitArg(arg).map(arg => Terminal.put(helpCmd(arg)))
+    else splitArg(arg).foreach(arg => Terminal.put(helpCmd(arg)))
 
   def doCmd(cmd: String, arg: String): Unit =
     if (cmd == "?") help(arg)
-    else if (cmd.size > 0) {
+    else if (cmd.nonEmpty) {
       val firstFoundCmdOpt = commands.find(_.cmd == cmd)
       if (firstFoundCmdOpt.isDefined) firstFoundCmdOpt.get.exec(arg)
       else Terminal.put(s"Unkown command: $cmd\nTry ? for help")
@@ -162,7 +162,7 @@ object AppController {
 
   // ----------------- utilities --------------------------------------
 
-  def canonicalPath: String  = new java.io.File(Main.path).getCanonicalPath()
+  def canonicalPath: String  = new java.io.File(Main.path).getCanonicalPath
 
   def randomStr(n: Int = 8): String = java.util.UUID.randomUUID().toString.take(n)
   def randomId(): String = {
@@ -253,7 +253,7 @@ object AppController {
 
   def addRecord(arg: String): Unit = {
     val args = splitArg(arg)
-    val idMaybe = if (args.nonEmpty) args(0) else Terminal.get(Id + ": ")
+    val idMaybe = if (args.nonEmpty) args.head else Terminal.get(Id + ": ")
     val id = idMaybe.takeWhile(_ != ' ')
     if (id != idMaybe) notifyIdMustBeOneWord()
     else if (isInt(id)) notifyIdCannotBeInteger()
@@ -279,7 +279,7 @@ object AppController {
             setCompletions()
             Terminal.put(s"Record at old index [$i] removed.")
           } else Terminal.put(s"Delete aborted.")
-        } else notifyIndexNotFound
+        } else notifyIndexNotFound()
 
       case Seq(ix1, ix2) if isInt(ix1) && isInt(ix2) =>
         val (start, end) = (ix1.toInt, ix2.toInt)
@@ -310,8 +310,8 @@ object AppController {
       case Seq() => Terminal.put(s"give index or id as argument")
 
       case args if args.size <= 2 =>
-        val i = if (isInt(args(0))) args(0).toInt
-                else vault.indexWhere(field = Id, value = args(0))
+        val i = if (isInt(args.head)) args.head.toInt
+                else vault.indexWhere(field = Id, value = args.head)
         if (i >= 0 && i < vault.size) {
           val id = vault(i).get(Id)
           Terminal.put(s"Edit record with id:$id\n")
@@ -349,8 +349,8 @@ object AppController {
 
       case args if args.size <= 2 =>
         val fieldToCopy = args.lift(1).getOrElse(Pw)
-        val i = if (isInt(args(0))) args(0).toInt
-                else vault.indexStartsWith(field = Id, valueStartsWith = args(0))
+        val i = if (isInt(args.head)) args.head.toInt
+                else vault.indexStartsWith(field = Id, valueStartsWith = args.head)
         if (i >= 0 && i < vault.size) copyToClipboardAndNotify(vault(i).get(fieldToCopy))
         else notifyRecordNotFound
 
@@ -367,7 +367,7 @@ object AppController {
     val newIds = fields.toSet[Secret].map(s => s.get(Id))
     val existingIds = vault.toSet.map(s => s.get(Id))
     val duplicates = newIds intersect existingIds
-    if (duplicates.size > 0) {
+    if (duplicates.nonEmpty) {
       Terminal.put("\n *** WARNING! Duplicate ids detected: " + duplicates.mkString(", "))
       if (Terminal.isOk("Do you want to remove all these ids in vault before importing?")) {
         vault.removeValuesOfField(duplicates.toSeq, Id)

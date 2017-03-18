@@ -18,8 +18,9 @@ object Main {
     |   -v [path]            same as --vault [path]
     """.stripMargin.trim
 
-  val GithubUrl    = "https://github.com/bjornregnell/keehive"
-  val GithubRawUrl = "https://raw.githubusercontent.com/bjornregnell/keehive/master"
+  val GithubUrl     = "https://github.com/bjornregnell/keehive"
+  val GithubRawUrl  = "https://raw.githubusercontent.com/bjornregnell/keehive/master"
+  val GitHubRelease = s"$GithubUrl/releases/download"
 
   val defaultPath  = s"${Disk.userDir}/keehive"
   var path: String = defaultPath
@@ -52,13 +53,13 @@ object Main {
 
   def install(): Unit = scala.util.Try {
     import scala.concurrent.duration._
-    Await.ready(latestVersionFuture, 3.seconds)
+    Await.ready(latestVersionFuture, 5.seconds)
     if (latestVersion.nonEmpty) {
       val v = latestVersion
       println(s"Installing keehive version $v in directory: $path")
       val jarFileName = s"keehive-$v.jar"
       val jarFilePath = s"$path/$jarFileName"
-      val jarFileUrl = s"$GithubUrl/releases/download/v$v/$jarFileName"
+      val jarFileUrl = s"$GitHubRelease/v$v/$jarFileName"
       println(s"Downloading: $jarFileUrl\nOutfile: $jarFilePath")
       val exists = Disk.createIfNotExist(jarFilePath)
       Download.toBinaryFile(jarFileUrl, jarFilePath)

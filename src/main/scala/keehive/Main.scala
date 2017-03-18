@@ -51,18 +51,17 @@ object Main {
   def isUpdateAvailable: Boolean = latestVersion.nonEmpty && latestVersion != version
 
   def install(): Unit = scala.util.Try {
-    println(s"Installing keehive in directory: $path")
     import scala.concurrent.duration._
     Await.ready(latestVersionFuture, 3.seconds)
     if (latestVersion.nonEmpty) {
       val v = latestVersion
+      println(s"Installing keehive version $v in directory: $path")
       val jarFileName = s"keehive-$v.jar"
       val jarFilePath = s"$path/$jarFileName"
       val jarFileUrl = s"$GithubUrl/releases/download/v$v/$jarFileName"
-      println(s"Downloading: $jarFileUrl\n\nOutfile: $jarFilePath")
+      println(s"Downloading: $jarFileUrl\nOutfile: $jarFilePath")
       val exists = Disk.createIfNotExist(jarFilePath)
       Download.toBinaryFile(jarFileUrl, jarFilePath)
-      print("\n")
     } else println("Error: No version info is available. Try again later.")
   }.recover{case e => println(s"Error: $e")}
 

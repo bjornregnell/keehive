@@ -60,7 +60,7 @@ object Main {
       val v = latestVersion
       val jarFileName = s"keehive-$v.jar"
       val jarFilePath = s"$path/$jarFileName"
-      val jarFileUrl = s"$GithubUrl/releases/download/v$v-beta/$jarFileName"
+      val jarFileUrl = s"$GithubUrl/releases/download/v$v/$jarFileName"
       println(s"Downloading: $jarFileUrl\n\nOutfile: $jarFilePath")
       val exists = Disk.createIfNotExist(jarFilePath)
       Download.toBinaryFile(jarFileUrl, jarFilePath)

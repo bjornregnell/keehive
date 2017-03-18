@@ -41,14 +41,12 @@ object Main {
   import scala.concurrent.{Future, Await}
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  val latestVersionFuture: Future[Option[String]] = Future {
+  val latestVersionFuture: Future[String] = Future {
     // download this in a Future to make app start fast
-    val s = Download.asString(s"$GithubRawUrl/version.txt")
-    val key = "latest-version:"
-    if (s.startsWith(key)) Some(s.stripPrefix(key)) else None
+    Download.asString(s"$GithubRawUrl/version.txt")
   }
 
-  def latestVersion: String = scala.util.Try(latestVersionFuture.value.get.get.get).getOrElse("")
+  def latestVersion: String = scala.util.Try(latestVersionFuture.value.get.get).getOrElse("")
 
   def isUpdateAvailable: Boolean = latestVersion.nonEmpty && latestVersion != version
 

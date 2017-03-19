@@ -49,6 +49,7 @@ object Main {
 
   def latestVersion: String = scala.util.Try(latestVersionFuture.value.get.get).getOrElse("")
 
+  //TODO refactor corresponding functionality in AppController to here:
   def isUpdateAvailable: Boolean = latestVersion.nonEmpty && latestVersion != version
 
   def install(): Unit = scala.util.Try {
@@ -82,7 +83,7 @@ object Main {
         if (isWindows)
           println(s"\nRun keehive by double-clicking on $path/bin/$launcher\nor write this in cmd or powershell:\n$launchCmd")
         else {
-          scala.sys.process.Process(s"chmod +x $path/bin/$launcher").!
+          scala.sys.process.Process(s"chmod +x $path/bin/$launcher").!  // make launcher executable
           println(s"\nRun keehive using this command in terminal:\nsource $path/bin/$launcher")
           println(s"\nTo install the kh command for keehive, enter this command in terminal:")
           println(s"sudo ln -s $path/bin/$launcher /usr/local/bin")

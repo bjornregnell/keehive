@@ -25,7 +25,7 @@ object Vault {
         MasterCheck(isValid = true, isCreated = false, salt)
       else MasterCheck(isValid = false, isCreated = false)
     } else {
-      Disk.createIfNotExist(file)
+      Disk.createFileIfNotExist(file)
       val salt = saveMasterPassword(file, mpw)
       MasterCheck(isValid = true, isCreated = true, salt)
     }
@@ -54,13 +54,15 @@ class Vault private (
   import scala.collection.mutable.ArrayBuffer
 
   type Secrets = ArrayBuffer[Secret]
+  type Data = ArrayBuffer[(Map[String,String], Long)]
 
   private var mpw = initMasterPassword
   private var secrets: Secrets = loadSecrets()
   private def key = mpw + salt
 
   private def saveSecrets(ss: Secrets): Unit = {
-    val encrypted = Crypto.AES.encryptObjectToString(ss, key)
+    val data: Data = ss.map(s => (s.data, s.timestamp))
+    val encrypted = Crypto.AES.encryptObjectToString(data, key)
     Terminal.put(s"Saving ${ss.size} secrets in vault.")
     Disk.saveString(encrypted, vaultFile)
   }
@@ -68,9 +70,10 @@ class Vault private (
   private def loadSecrets(): Secrets = {
     if (Disk.isExisting(vaultFile)) {
       val encrypted = Disk.loadString(vaultFile)
-      val secretsOpt: Option[Secrets] = Crypto.AES.decryptObjectFromString(encrypted, key)
-      if (secretsOpt.isEmpty)
+      val dataOpt: Option[Data] = Crypto.AES.decryptObjectFromString(encrypted, key)
+      if (dataOpt.isEmpty)
         Main.abort("Inconsistency between master password and encrypted vault!")
+      val secretsOpt: Option[Secrets] = dataOpt.map(p => p.map{case (d,t) => Secret(d, t)})
       Terminal.put(s"Loaded ${secretsOpt.get.size} secrets.")
       secretsOpt.get
     } else {

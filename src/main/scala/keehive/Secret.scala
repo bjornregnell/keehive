@@ -1,6 +1,6 @@
 package keehive
 
-case class Secret private (
+case class Secret (
     data: Map[String, String] = Map(),
     timestamp: Long = System.currentTimeMillis){
 
@@ -40,6 +40,5 @@ case class Secret private (
 }
 
 object Secret {
-  def apply(data: Map[String, String]): Secret = new Secret(data)
   def empty: Secret = new Secret()
 }

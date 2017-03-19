@@ -2,7 +2,7 @@ package keehive
 
 object AppController {
   val welcomeBanner = raw"""
-    |*************************************
+    |********************************************
     |   _             _     _
     |  | |           | |   (_)
     |  | | _____  ___| |__  ___   _____
@@ -10,17 +10,17 @@ object AppController {
     |  |   <  __/  __/ | | | |\ V /  __/
     |  |_|\_\___|\___|_| |_|_| \_/ \___|
     |
-    | Welcome to keehive v${Main.version}
-    | ${Main.GithubUrl}
+    | Welcome to keehive version ${Main.version}
+    | ${Main.GitHubUrl}
     |
     | Type ? and press Enter for help.
     | Press TAB for completion.
     | Press Ctrl+L to clear screen.
     |
-    | Built with Scala ${util.Properties.versionNumberString}
-    | Running Java ${System.getProperty("java.version")}
+    | Built with Scala ${util.Properties.versionNumberString} running on:
+    | ${System.getProperty("java.vm.name")} ${System.getProperty("java.version")}
     |
-    |*************************************
+    |********************************************
     """.stripMargin
 
   val helpText = s"""
@@ -43,21 +43,25 @@ object AppController {
     |edit id   edit the record with id
     |edit i f  edit/add the field f of record with id/index i
     |
+    |xport     export all records to clipboard as plain tex
+    |
     |help      show this message; also ?
     |
     |import    import records from clipboard
     |
-    |list      list all records, hide password
+    |list      list summary of all records, hide password
     |list 42   list fields of record with index 42, hide password
     |list s    list fields of record with id that starts with s, hide password
     |
+    |print     prints all records including password
+    |
     |quit      quit keehive; also Ctrl+D
     |
-    |show      list all records, show password
+    |show      list summary of all records, show password
     |show 42   list fields of record with index 42, show password
     |show s    list fields of record with id that starts with s, show password
     |
-    |xport     export all records to clipboard as plain tex
+    |update    check for new versions of keehive, download and install
     """.stripMargin
 
   val cmdPrompt     = "\nkeehive> "
@@ -75,6 +79,7 @@ object AppController {
       vault = vaultOpt.get
       if (isCreated) notifyMpwCreated() else notifyMpwGood()
       setCompletions()
+      notifyIfUpdateAvailable()
       cmdLoop()
     } else abortMpwBad()
   }
@@ -103,13 +108,15 @@ object AppController {
     Cmd("show", listRecords(_, isShowAll = true)),
     Cmd("print", _ => println(showAllRecordsAndFields)),
     Cmd("copy", copyRecord),
-    Cmd("xport", _ => exportAllToClipboard()),
+    Cmd("export", _ => exportAllToClipboard()),
     Cmd("import", _ => importFromClipboard()),
+    Cmd("update", _ => checkForUpdateAndInstall()),
     Cmd("help", help),
     Cmd("quit", _ => Main.quit())
   )
 
-  lazy val helpLines = helpText.split('\n').toSeq
+  lazy val helpLines: Seq[String] = helpText.split('\n').toSeq
+
   def helpCmd(cmd: String): String = {
     val initDropped = helpLines.dropWhile(line => !line.startsWith(cmd))
     initDropped.takeWhile(line => line.startsWith(cmd)).mkString("\n")
@@ -249,6 +256,13 @@ object AppController {
     if (kvs.nonEmpty) Some(Secret(kvsWithId)) else None
   }
 
+  def notifyIfUpdateAvailable(): Unit =
+    if (Main.latestVersion.nonEmpty) {
+      if (Main.latestVersion != Main.version) {
+        Terminal.put("Version ${Main.latestVersion} is available. Type 'update' to install.")
+      }
+    }
+
   // ----------------- commands ---------------------------------------
 
   def addRecord(arg: String): Unit = {
@@ -274,7 +288,7 @@ object AppController {
       case Seq(ix) if isInt(ix) =>
         val i = ix.toInt
         if (i >= 0 && i < vault.size) {
-          if (Terminal.isOk(s"Are you shure that you want to delete [$i]")) {
+          if (Terminal.isOk(s"Are you sure that you want to delete [$i]")) {
             vault.remove(i)
             setCompletions()
             Terminal.put(s"Record at old index [$i] removed.")
@@ -285,17 +299,17 @@ object AppController {
         val (start, end) = (ix1.toInt, ix2.toInt)
         if (start >= 0 && start < vault.size && end > start && end < vault.size) {
           val n = end - start + 1
-          if (Terminal.isOk(s"Are you shure that you want to delete $n records at [$start-$end]")) {
+          if (Terminal.isOk(s"Are you sure that you want to delete $n records at [$start-$end]")) {
             vault.remove(start, n)
             setCompletions()
             Terminal.put(s"Record at old indices [$start-$end] removed.")
           } else Terminal.put(s"Delete aborted.")
-        } else notifyIndexNotFound
+        } else notifyIndexNotFound()
 
       case Seq(id) =>
         val i = vault.indexWhere(field = Id, value = id)
-        if (i < 0) notifyRecordNotFound
-        else if (Terminal.isOk(s"Are you shure that you want to delete id:$id")) {
+        if (i < 0) notifyRecordNotFound()
+        else if (Terminal.isOk(s"Are you sure that you want to delete id:$id")) {
           vault.remove(i)
           setCompletions()
           Terminal.put(s"Record at old index [$i] with id:$id removed.")
@@ -307,7 +321,7 @@ object AppController {
 
   def editRecord(arg: String): Unit = {
     splitArg(arg) match {
-      case Seq() => Terminal.put(s"give index or id as argument")
+      case Seq() => Terminal.put(s"Give index or id as argument!")
 
       case args if args.size <= 2 =>
         val i = if (isInt(args.head)) args.head.toInt
@@ -325,7 +339,7 @@ object AppController {
           listRecords(i.toString, isShowAll = false)
         } else notifyRecordNotFound
 
-      case _ => Terminal.put(s"too many arguments: $arg")
+      case _ => Terminal.put(s"Too many arguments: $arg")
     }
   }
 
@@ -354,7 +368,7 @@ object AppController {
         if (i >= 0 && i < vault.size) copyToClipboardAndNotify(vault(i).get(fieldToCopy))
         else notifyRecordNotFound
 
-      case _ => Terminal.put(s"too many arguments: $arg")
+      case _ => Terminal.put(s"Too many arguments: $arg")
     }
   }
 
@@ -390,9 +404,17 @@ object AppController {
     Terminal.put(fields.map(_.get("id")).mkString(", "))
     if (Terminal.isOk(s"Do you want to append the $n records to your vault?")) {
       val fieldsToAppend = checkForDuplicates(fields)
-      setCompletions()
       vault.add(fieldsToAppend:_*)
+      setCompletions()
     }
   }
 
+  def checkForUpdateAndInstall(): Unit =
+    if (Main.latestVersion.nonEmpty) {
+      if (Main.latestVersion != Main.version) {
+        if (Terminal.isOk(s"Version ${Main.latestVersion} is available. Download and install?"))
+          Main.install()
+        else Terminal.put("Installation aborted.")
+      } else Terminal.put(s"Already up to date! Current version of keehive is ${Main.version}")
+    } else Terminal.put("No information on latest version available.")
 }

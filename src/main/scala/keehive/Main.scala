@@ -18,9 +18,9 @@ object Main {
     |   -v [path]            same as --vault [path]
     """.stripMargin.trim
 
-  val GithubUrl     = "https://github.com/bjornregnell/keehive"
-  val GithubRawUrl  = "https://raw.githubusercontent.com/bjornregnell/keehive/master"
-  val GitHubRelease = s"$GithubUrl/releases/download"
+  val GitHubUrl     = "https://github.com/bjornregnell/keehive"
+  val GitHubRawUrl  = "https://raw.githubusercontent.com/bjornregnell/keehive/master"
+  val GitHubRelease = s"$GitHubUrl/releases/download"
 
   val defaultPath  = s"${Disk.userDir}/keehive"
   var path: String = defaultPath
@@ -41,10 +41,10 @@ object Main {
 
   import scala.concurrent.{Future, Await}
   import scala.concurrent.ExecutionContext.Implicits.global
+  import scala.concurrent.duration._
 
   val latestVersionFuture: Future[String] = Future {
-    // download this in a Future to make app start fast
-    Download.asString(s"$GithubRawUrl/version.txt")
+    Download.asString(s"$GitHubRawUrl/version.txt")
   }
 
   def latestVersion: String = scala.util.Try(latestVersionFuture.value.get.get).getOrElse("")
@@ -52,18 +52,43 @@ object Main {
   def isUpdateAvailable: Boolean = latestVersion.nonEmpty && latestVersion != version
 
   def install(): Unit = scala.util.Try {
-    import scala.concurrent.duration._
+
+    def createDir(dir: String): Unit =
+      if (Disk.createDirIfNotExist(dir)) println(s"Directory created: $dir")
+
+    def download(source: String, dest: String): Unit = {
+      println(s"Downloading: $source\nOutfile: $dest")
+      Download.toBinaryFile(source, dest)
+    }
+
+    def isWindows: Boolean = System.getProperty("os.name").toLowerCase.contains("win")
+
+    println(s"Keehive installer, current version: $version")
+    println(Seq("os.name", "os.version", "java.vm.name", "java.runtime.version").
+      map(System.getProperty).mkString(" "))
+    createDir(path)
     Await.ready(latestVersionFuture, 5.seconds)
+
     if (latestVersion.nonEmpty) {
       val v = latestVersion
-      println(s"Installing keehive version $v in directory: $path")
-      val jarFileName = s"keehive-$v.jar"
-      val jarFilePath = s"$path/$jarFileName"
-      val jarFileUrl = s"$GitHubRelease/v$v/$jarFileName"
-      println(s"Downloading: $jarFileUrl\nOutfile: $jarFilePath")
-      val exists = Disk.createIfNotExist(jarFilePath)
-      Download.toBinaryFile(jarFileUrl, jarFilePath)
-    } else println("Error: No version info is available. Try again later.")
+      println(s"\nAttempting installation of latest version $v in directory: $path")
+      createDir(s"$path/bin")
+      val jarFile = s"$path/bin/keehive-$v.jar"
+      if (!Disk.isExisting(jarFile)) {
+        download(source = s"$GitHubRelease/v$v/keehive-$v.jar", dest = jarFile)
+        val launcher = if (isWindows) "kh.bat" else "kh"
+        val launchCmd = s"java -jar $jarFile"
+        Disk.saveString(launchCmd, s"$path/bin/$launcher")
+        if (isWindows)
+          println(s"\nRun keehive by double-clicking on $path/bin/$launcher\nor write this in cmd or powershell:\n$launchCmd")
+        else {
+          println(s"\nRun keehive using this command in terminal:\nsource $path/bin/$launcher")
+          println(s"\nTo install the kh command for keehive, enter this command in terminal:")
+          println(s"sudo chmod +x $path/bin/$launcher && sudo ln -s $path/bin/$launcher /usr/local/bin")
+        }
+      } else println(s"\nError: File already exists: $jarFile")
+    } else println("\nError: Version info is not yet available. Check internet connection to https://github.com")
+
   }.recover{case e => println(s"Error: $e")}
 
 }

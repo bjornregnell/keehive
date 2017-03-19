@@ -82,9 +82,10 @@ object Main {
         if (isWindows)
           println(s"\nRun keehive by double-clicking on $path/bin/$launcher\nor write this in cmd or powershell:\n$launchCmd")
         else {
+          scala.sys.process.Process(s"chmod +x $path/bin/$launcher").!
           println(s"\nRun keehive using this command in terminal:\nsource $path/bin/$launcher")
           println(s"\nTo install the kh command for keehive, enter this command in terminal:")
-          println(s"sudo chmod +x $path/bin/$launcher && sudo ln -s $path/bin/$launcher /usr/local/bin")
+          println(s"sudo ln -s $path/bin/$launcher /usr/local/bin")
         }
       } else println(s"\nError: File already exists: $jarFile")
     } else println("\nError: Version info is not yet available. Check internet connection to https://github.com")

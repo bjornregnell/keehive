@@ -256,12 +256,22 @@ object AppController {
     if (kvs.nonEmpty) Some(Secret(kvsWithId)) else None
   }
 
-  def notifyIfUpdateAvailable(): Unit =
+  def notifyIfUpdateAvailable(): Unit = {
+
+    def isFirstVersionGreater(vs: Seq[(String, String)]): Boolean =
+      if (vs.nonEmpty) {
+        val (first, second) = (toIntOpt(vs.head._1).getOrElse(0), toIntOpt(vs.head._2).getOrElse(0))
+        if (first == second) isFirstVersionGreater(vs.drop(1))
+        else first > second
+      } else false
+
     if (Main.latestVersion.nonEmpty) {
-      if (Main.latestVersion != Main.version) {
-        Terminal.put("Version ${Main.latestVersion} is available. Type 'update' to install.")
+      val vs = Main.latestVersion.split('.') zip Main.version.split('.')
+      if (isFirstVersionGreater(vs)) {
+        Terminal.put(s"Keehive version ${Main.latestVersion} is available. Type 'update' to install.")
       }
     }
+  }
 
   // ----------------- commands ---------------------------------------
 

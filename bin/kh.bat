@@ -1,1 +1,1 @@
-java -jar keehive-0.2.jar
+java -jar keehive-0.3.jar

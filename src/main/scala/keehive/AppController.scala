@@ -103,7 +103,7 @@ object AppController {
 
   val commands = Vector(
     Cmd("add",  addRecord),
-    Cmd("del",  deleteRecord),
+    Cmd("delete",  deleteRecord),
     Cmd("edit", editRecord),
     Cmd("list", listRecords(_, isShowAll = false)),
     Cmd("show", listRecords(_, isShowAll = true)),

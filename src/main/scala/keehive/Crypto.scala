@@ -18,14 +18,26 @@ object Crypto {
     def encodeToString(s: String): String = encodeToString(s.getBytes)
   }
 
+  private lazy val rnd = new java.security.SecureRandom
+
   object Salt {
     val init: String = "wUliyZmCxzu1Ecmw7/BhC4Sfw7hr5V4+/0HwXWx08go="
-    val rnd = new java.security.SecureRandom
     val saltLength = 32
     def next: String = {
       val xs = new Array[Byte](saltLength)
       rnd.nextBytes(xs)
       Base64.encodeToString(xs)
+    }
+  }
+
+  object Password {
+    def generate(length: Int = 20, charsToInclude: String = "0-9 A-Z a-z -!.*+/#<>"): String = {
+      val chars: String = charsToInclude.split(' ').toSeq.map {
+          case s if s.size == 3 && s(1) == '-' => (s(0) to s(2)).mkString
+          case s => s
+        }.mkString
+      val xs: Seq[Char] = for (i <- 0 until length) yield { chars(rnd.nextInt(chars.size))}
+      xs.mkString
     }
   }
 

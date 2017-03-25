@@ -19,7 +19,6 @@ object Download {
     println(s"$n bytes written. Download ready!")
   }
 
-
   def toBinaryFile( url: String,
                     fileName: String,
                     onWrite: Long => Unit = printBytesWriting,

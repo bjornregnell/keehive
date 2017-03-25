@@ -41,7 +41,7 @@ object Disk {
   }
 
   def loadString(fileName: String, enc: String = "UTF-8"): String =
-    scala.io.Source.fromFile(fileName, enc).getLines.mkString
+    scala.io.Source.fromFile(fileName, enc).getLines.mkString("\n")
 
   def loadLines(fileName: String, enc: String = "UTF-8"): Vector[String] =
     scala.io.Source.fromFile(fileName, enc).getLines.toVector

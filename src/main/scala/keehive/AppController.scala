@@ -105,6 +105,7 @@ object AppController {
     Cmd("add",  addRecord),
     Cmd("delete",  deleteRecord),
     Cmd("edit", editRecord),
+    Cmd("genpw", copyPasswordToClipboard),
     Cmd("list", listRecords(_, isShowAll = false)),
     Cmd("show", listRecords(_, isShowAll = true)),
     Cmd("print", _ => println(showAllRecordsAndFields)),
@@ -221,10 +222,18 @@ object AppController {
     fields.map { field =>
       val pad = " " * (MaxFieldLength - field.length + 1)
       val prompt = s"$field:$pad"
-      val s =
+
+      val input =
         if (SecretFields contains field) Terminal.getSecret(prompt)
         else Terminal.get(prompt, default.getOrElse(field,""))
-      val value = if (s == Terminal.CtrlD) "" else s
+
+      val value = if (input == Terminal.CtrlD) "" else {
+        if (field == Pw && input == "") {
+          if (Terminal.isOk("Generate new password?"))
+            generatePassword()
+          else default.getOrElse(Pw,"")
+        } else input
+      }
       (field, value)
     }.toMap
   }
@@ -272,6 +281,14 @@ object AppController {
         Terminal.put(s"Keehive version ${Main.latestVersion} is available. Type 'update' to install.")
       }
     }
+  }
+
+  def generatePassword(): String = {
+    val length = Settings.getInt("generatePasswordLength").getOrElse(20)
+    val chars = Settings("generatePasswordChars").getOrElse("0-9 A-Z a-z")
+    //Terminal.put(s"Generating $length charachters that may include: $chars")
+    //Terminal.put(s"Password generation settings in file: ${Settings.fileName}")
+    Crypto.Password.generate(length, chars)
   }
 
   // ----------------- commands ---------------------------------------
@@ -345,7 +362,10 @@ object AppController {
             if (args.size > 1) args.drop(1)
             else (vault(i).data.keySet - OldPw - Id).toSeq
           val edited = userInput(fieldsToEdit, default) + (Id -> id)
-          vault(i) = Secret(vault(i).data ++ edited)
+          val (enteredPw, existingPw) = (edited.getOrElse(Pw, ""), vault(i).get(Pw))
+          val appendOldPwMap: Map[String, String] =
+            if (enteredPw != existingPw) Map(OldPw -> existingPw) else Map()
+          vault(i) = Secret(vault(i).data ++ edited ++ appendOldPwMap)
           Terminal.put(s"\nEdited record with id:$id")
           listRecords(i.toString, isShowAll = false)
         } else notifyRecordNotFound
@@ -353,6 +373,9 @@ object AppController {
       case _ => Terminal.put(s"Too many arguments: $arg")
     }
   }
+
+  def copyPasswordToClipboard(cmd: String): Unit = copyToClipboardAndNotify(generatePassword())
+
 
   def listRecords(arg: String, isShowAll: Boolean): Unit = {
     val fieldsToExclude = if (isShowAll) Seq() else SecretFields

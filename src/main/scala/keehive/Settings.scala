@@ -1,8 +1,8 @@
 package keehive
 
 object Settings {
-  lazy val fileName = Main.path +"/keehive.settings"
-  lazy val default: Map[String, String] = Map(
+  val fileName = Main.path +"/keehive.settings"
+  val default: Map[String, String] = Map(
     "defaultUser"  -> System.getProperty("user.name"),
     "defaultEmail" -> "",
     "generatePasswordChars"  -> "0-9 A-Z a-z *-.",
@@ -11,10 +11,18 @@ object Settings {
 
   private var settings: Map[String, String] = default
 
+  def toMap: Map[String, String] = settings
+  def apply(key: String): String = settings.getOrElse(key, "")
+  def update(key: String, value: String): Unit = {
+    settings = settings.updated(key,value)
+    save()
+  }
+
   override def toString: String = settings.map{ case (k, v) => s"$k=$v"}.mkString("\n")
 
   def save(): Unit = scala.util.Try {
     Disk.saveString(toString, fileName)
+    Terminal.put(s"Settings saved to file: $fileName")
   } recover { case e => println(s"Error when saving settings: $e") }
 
   def load(): Unit = {

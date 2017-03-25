@@ -1,7 +1,9 @@
 package keehive
 
 object Settings {
-  val fileName = Main.path +"/keehive.settings"
+  import scala.util.Try
+
+  val fileName = Main.path +"/settings.txt"
   val default: Map[String, String] = Map(
     "defaultUser"  -> System.getProperty("user.name"),
     "defaultEmail" -> "",
@@ -12,11 +14,13 @@ object Settings {
   private var settings: Map[String, String] = default
 
   def toMap: Map[String, String] = settings
-  def apply(key: String): String = settings.getOrElse(key, "")
+  def apply(key: String): Option[String] = settings.get(key)
   def update(key: String, value: String): Unit = {
     settings = settings.updated(key,value)
     save()
   }
+
+  def getInt(key: String): Option[Int] = Try { settings(key).toInt } toOption
 
   override def toString: String = settings.map{ case (k, v) => s"$k=$v"}.mkString("\n")
 
@@ -27,12 +31,16 @@ object Settings {
 
   def load(): Unit = {
     Terminal.put(s"Loading settings from file: $fileName")
-    scala.util.Try {
+    scala.util.Try  {
       if (!Disk.isExisting(fileName)) {
         Terminal.put(s"New settings file created.")
         save()
       }
-      val lines = Disk.loadString(fileName).split('\n').filter(_.nonEmpty)
+      val lines = Disk.loadLines(fileName).filter(_.nonEmpty)
+      val mappings: Seq[Seq[String]] = lines.map(_.split('=').toSeq)
+      mappings.collect {
+        case Seq(key, value) => settings = settings.updated(key.trim, value.trim)
+      }
     } recover { case e => Terminal.put(s"Error when loading settings: $e") }
   }
 

@@ -71,8 +71,9 @@ object AppController {
 
   def start(): Unit  = {
     Terminal.put(welcomeBanner)
-    Terminal.put(s"Vault directory: $canonicalPath\n")
-    enteredMasterPassword = Terminal.getSecret(mpwPrompt)
+    Terminal.put(s"Vault directory: $canonicalPath")
+    Settings.load()
+    enteredMasterPassword = Terminal.getSecret("\n" + mpwPrompt)
 
     val Vault.Result(vaultOpt, isCreated) = Vault.open(enteredMasterPassword, Main.path)
     if (vaultOpt.isDefined) {

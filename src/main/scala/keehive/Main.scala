@@ -6,16 +6,14 @@ object Main {
   val isInstall: Set[String] = Set("--install", "-i")
   val isVault:   Set[String] = Set("--vault", "-v")
   val usageHelpMsg: String = s"""
-    | keehive terminal password manager version: $version
-    | usage:
-    |   java -jar keehive-$version.jar [args]
+    | Keehive terminal password manager version: $version
     |
     | args:
-    |   no args              start keehive using default vault dir: ~/keehive
+    |   no args              launch keehive using default vault dir: ~/keehive
+    |   --vault [path]       launch keehive with specified path to vault dir
+    |   -v [path]            same as --vault [path]
     |   --install [path]     install keehive, in optional path, default: ~/keehive
     |   -i [path]            same as --install [path]
-    |   --vault [path]       set path of vault directory, default ~/keehive
-    |   -v [path]            same as --vault [path]
     """.stripMargin.trim
 
   val GitHubUrl     = "https://github.com/bjornregnell/keehive"
@@ -78,7 +76,7 @@ object Main {
       if (!Disk.isExisting(jarFile)) {
         download(source = s"$GitHubRelease/v$v/keehive-$v.jar", dest = jarFile)
         val launcher = if (isWindows) "kh.bat" else "kh"
-        val launchCmd = s"java -jar $jarFile"
+        val launchCmd = if (isWindows) s"""java -jar $jarFile %*\n""" else  s"""java -jar $jarFile "$$@"\n"""
         Disk.saveString(launchCmd, s"$path/bin/$launcher")
         if (isWindows)
           println(s"\nRun keehive by double-clicking on $path/bin/$launcher\nor write this in cmd or powershell:\n$launchCmd")

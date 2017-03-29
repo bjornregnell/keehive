@@ -19,16 +19,26 @@
 
 * Download the [latest released jar-file](https://github.com/bjornregnell/keehive/releases/)
 
-* Open a terminal and run the jar-file using this comman (replace x.y with version number):
+* Open a terminal and run the jar-file using this command (replace x.y with version number):
 
 ```
-java -jar keehive-x.y.jar
+java -jar keehive-x.y.jar --install
 ```
 
 ## How to use keehive?
 
+Once installed you can use the launcher in `~/keehive/bin/kh.cmd` for Windows and `~/keehive/bin/kh` for Linux and Mac. Or you can just type this command in terminal (replace x.y with version number):
+
+```
+java -jar ~/keehive/bin/keehive-x.y.jar --install
+```
+
+You can see available commands by typing help:
+
 ```
 keehive> help
+
+keehive is a terminal password manager
 
 Press TAB for completion of these commands (alphabetical order):
 
@@ -38,7 +48,7 @@ add id    add a new record with id, enter each field after prompt
 copy s    copy password of record with id starting with s
           example: c<TAB> s<TAB>      copy password of id starting with s
 copy s f  copy field f of record with id starting with s
-          example: c<TAB> myid url    copy the url field of id:myid
+          example: c<TAB> someId url    copy the url field of someId
 
 del 42    delete the record at index 42
 del id    delete the record with id
@@ -47,19 +57,26 @@ edit 42   edit the record at index 42
 edit id   edit the record with id
 edit i f  edit/add the field f of record with id/index i
 
+xport     export all records to clipboard as plain tex
+
 help      show this message; also ?
 
-list      list all records, hide password
-list 42   list fileds of record with index 42, hide password
+import    import records from clipboard
+
+list      list summary of all records, hide password
+list 42   list fields of record with index 42, hide password
 list s    list fields of record with id that starts with s, hide password
+
+print     prints all records including password
 
 quit      quit keehive; also Ctrl+D
 
-show      list all records, show password
-show 42   list fileds of record with index 42, show password
+show      list summary of all records, show password
+show 42   list fields of record with index 42, show password
 show s    list fields of record with id that starts with s, show password
 
-xport     export all records to clipboard as plain tex
+update    check for new versions of keehive, download and install
+
 ```
 
 

@@ -25,6 +25,29 @@
 java -jar keehive-x.y.jar --install
 ```
 
+* To see args when launching keehive: give `--help` as param:
+
+```
+$ cd ~/keehive/bin
+$ ls
+keehive-0.3.jar  kh
+$ cat kh
+java -jar /home/bjornr/keehive/bin/keehive-0.3.jar "$@"
+$ ./kh --help
+keehive terminal password manager version: 0.3
+ usage:
+   java -jar keehive-0.3.jar [args]
+
+ args:
+   no args              start keehive using default vault dir: ~/keehive
+   --install [path]     install keehive, in optional path, default: ~/keehive
+   -i [path]            same as --install [path]
+   --vault [path]       set path of vault directory, default ~/keehive
+   -v [path]            same as --vault [path]
+$
+```
+
+
 ## How to use keehive?
 
 Once installed you can use the launcher in `~/keehive/bin/kh.cmd` for Windows and `~/keehive/bin/kh` for Linux and Mac. Or you can just type this command in terminal (replace x.y with version number):
@@ -33,7 +56,7 @@ Once installed you can use the launcher in `~/keehive/bin/kh.cmd` for Windows an
 java -jar ~/keehive/bin/keehive-x.y.jar --install
 ```
 
-You can see available commands by typing help:
+After launching Keehive, you can see available commands by typing help:
 
 ```
 keehive> help

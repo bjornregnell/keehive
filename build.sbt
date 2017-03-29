@@ -1,5 +1,5 @@
 lazy val appname = "keehive"
-lazy val versnum = "0.3"
+lazy val versnum = "0.4"
 
 lazy val root = (project in file(".")).
   settings(

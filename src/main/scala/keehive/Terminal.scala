@@ -7,6 +7,7 @@ object Terminal {
 
   private def replaceNull(s: String): String = if (s == null) CtrlD else s
 
+  //jline-2.14.3 is required for default values to work
   def get(prompt: String = "", default: String = ""): String =
     replaceNull(reader.readLine(prompt, null, default))
 
@@ -23,7 +24,7 @@ object Terminal {
     }
   }
 
-  def setCompletions(first: Seq[String], second: Seq[String]): Unit = {
+  def setCompletions(first: Seq[String], second: Seq[String]): Boolean = {
     removeCompletions()
     val sc1 = new jline.console.completer.StringsCompleter(first: _*)
     val sc2 = new jline.console.completer.StringsCompleter(second: _*)

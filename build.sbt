@@ -7,5 +7,16 @@ lazy val root = (project in file(".")).
     scalaVersion := "2.11.8",
     version      := s"$versnum-SNAPSHOT",
     name := appname,
-    assemblyJarName in assembly := s"$appname-$versnum.jar"
+    assemblyJarName in assembly := s"$appname-$versnum.jar",
+    scalacOptions ++= Seq(
+      "-encoding", "UTF-8",
+      "-unchecked",
+      "-deprecation",
+      "-Xfuture",
+      "-Yno-adapted-args",
+      "-Ywarn-dead-code",
+      "-Ywarn-numeric-widen",
+      "-Ywarn-value-discard",
+      "-Ywarn-unused"
+    )
   )

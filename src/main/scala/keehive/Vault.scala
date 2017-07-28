@@ -77,6 +77,8 @@ class Vault private (
       Terminal.put(s"Loaded ${secretsOpt.get.size} secrets.")
       secretsOpt.get
     } else {
+      Terminal.put("No vault found - empty vault will be created after verification.")
+      AppController.abortIfUnableToVerifyMasterPassword()
       val emptySecrets: Secrets = ArrayBuffer.empty
       Terminal.put(s"Creating new empty vault.")
       saveSecrets(emptySecrets)

@@ -30,12 +30,17 @@ object Settings {
   } recover { case e => println(s"Error when saving settings: $e") }
 
   def load(): Unit = {
-    Terminal.put(s"Loading settings from file: $fileName")
     scala.util.Try  {
       if (!Disk.isExisting(fileName)) {
-        Terminal.put(s"New settings file created.")
+        Terminal.put(s"No settings file found: $fileName")
+        if (!Disk.isExisting(Main.path)) {
+          Terminal.put(s"No keehive directory found: ${Main.path}")
+          Disk.createDirIfNotExist(Main.path)
+          Terminal.put(s"Directory created: ${Main.path}")
+        }
         save()
-      }
+      } else
+      Terminal.put(s"Loading settings from file: $fileName")
       val lines = Disk.loadLines(fileName).filter(_.nonEmpty)
       val mappings: Seq[Seq[String]] = lines.map(_.split('=').toSeq)
       mappings.collect {

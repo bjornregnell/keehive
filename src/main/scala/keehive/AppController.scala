@@ -3,12 +3,12 @@ package keehive
 object AppController {
   val welcomeBanner = raw"""
     |********************************************
-    |   _             _     _
-    |  | |           | |   (_)
-    |  | | _____  ___| |__  ___   _____
-    |  | |/ / _ \/ _ \ '_ \| \ \ / / _ \
-    |  |   <  __/  __/ | | | |\ V /  __/
-    |  |_|\_\___|\___|_| |_|_| \_/ \___|
+    |      _             _     _
+    |     | |           | |   (_)
+    |     | | _____  ___| |__  ___   _____
+    |     | |/ / _ \/ _ \ '_ \| \ \ / / _ \
+    |     |   <  __/  __/ | | | |\ V /  __/
+    |     |_|\_\___|\___|_| |_|_| \_/ \___|
     |
     | Welcome to keehive version ${Main.version}
     | ${Main.GitHubUrl}
@@ -66,14 +66,20 @@ object AppController {
 
   val cmdPrompt     = "\nkeehive> "
   val mpwPrompt     = "Enter master password: "
+  def readMasterPassword(msg: String = mpwPrompt): String = Terminal.getSecret("\n" + msg)
+  def abortIfUnableToVerifyMasterPassword(): Unit = {
+    val verifyMpw = readMasterPassword("Verify Master Password:")
+    if (verifyMpw != enteredMasterPassword) Main.abort("Entered passwords does not match.")
+  }
 
   // --------------- Command Control ----------------------
+
 
   def start(): Unit  = {
     Terminal.put(welcomeBanner)
     Terminal.put(s"Vault directory: $canonicalPath")
     Settings.load()
-    enteredMasterPassword = Terminal.getSecret("\n" + mpwPrompt)
+    enteredMasterPassword = readMasterPassword()
 
     val Vault.Result(vaultOpt, isCreated) = Vault.open(enteredMasterPassword, Main.path)
     if (vaultOpt.isDefined) {
@@ -156,7 +162,6 @@ object AppController {
   def notifyMpwCreated(): Unit = Terminal.put("New master password file created.")
   def notifyMpwGood(): Unit = Terminal.put("Your vault is open!")
   def notifySaveVault(n: Int): Unit = Terminal.put(s"Saving $n secrets in vault.")
-  def notifyCreateVault(): Unit = Terminal.put("Creating new empty vault.")
   def abortMpwBad(): Unit = Main.abort("Bad master password :( ACCESS DENIED!")
   def notifyIdExists(): Unit = Terminal.put(s"That $Id already exists; pick another.")
   def notifyRecordNotFound(): Unit = Terminal.put(s"That record does not exists.")
@@ -167,6 +172,7 @@ object AppController {
   // ----------------- mutable attributes ------------------------------
 
   private var enteredMasterPassword: String = _
+  def lastEnteredMasterPassword = enteredMasterPassword
   private var vault: Vault = _
 
   // ----------------- utilities --------------------------------------

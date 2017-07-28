@@ -1,7 +1,8 @@
 package keehive
 
 object Terminal {
-  val reader = new jline.console.ConsoleReader
+  final val reader = new jline.console.ConsoleReader
+  reader.setExpandEvents(false)  //to avoid crash on '!' : https://github.com/jline/jline2/issues/96
 
   final val CtrlD = "\u0004"  // End Of Transmission
 

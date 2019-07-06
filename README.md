@@ -8,8 +8,7 @@
   - store your passwords and related information (user id, site url, etc) in an  encrypted file using [AES encryption](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard)
   - create, list, edit, delete your passwords through an effective Command Line Interface with TAB-completion and line editing powered by [jline](https://jline.github.io/jline2)
 
-
-* keehive is open source software created in [Scala 2.11.8](www.scala-lang.org) using  encryption utilities in Java JDK8. The code-base is small (less than thousand source lines in one package in less than ten files) and is written to be understandable to anyone with basic programming skills in Scala. The code is kept simple without advanced Scala features, such as implicits and type-level programming.
+* keehive is open source software created using [Scala](www.scala-lang.org) using  encryption utilities in Java JDK8. The code-base is small (less than thousand source lines in one package in less than ten files) and is written to be understandable to anyone with basic programming skills in Scala. The code is kept simple without advanced Scala features, such as implicits and type-level programming.
 
 * Contributions are welcome! See below under 'How to contribute to keehive?'
 
@@ -30,13 +29,13 @@ java -jar keehive-x.y.jar --install
 ```
 $ cd ~/keehive/bin
 $ ls
-keehive-0.3.jar  kh
+keehive-0.5.jar  kh
 $ cat kh
-java -jar /home/bjornr/keehive/bin/keehive-0.3.jar "$@"
+java -jar /home/bjornr/keehive/bin/keehive-0.5.jar "$@"
 $ ./kh --help
-keehive terminal password manager version: 0.3
+keehive terminal password manager version: 0.5
  usage:
-   java -jar keehive-0.3.jar [args]
+   java -jar keehive-0.5.jar [args]
 
  args:
    no args              start keehive using default vault dir: ~/keehive

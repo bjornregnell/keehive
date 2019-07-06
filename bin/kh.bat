@@ -1,1 +1,1 @@
-java -jar keehive-0.4.jar %*
+java -jar keehive-0.5.jar %*

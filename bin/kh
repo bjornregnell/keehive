@@ -1,4 +1,4 @@
 ##!/bin/bash
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-java -jar "$DIR/keehive-0.4.jar" "$@"
+java -jar "$DIR/keehive-0.5.jar" "$@"

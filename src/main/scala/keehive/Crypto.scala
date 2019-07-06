@@ -1,7 +1,5 @@
 package keehive
 
-import java.security.MessageDigest
-
 object Crypto {
   import scala.util.Try
 
@@ -31,12 +29,13 @@ object Crypto {
   }
 
   object Password {
-    def generate(length: Int = 20, charsToInclude: String = "0-9 A-Z a-z -!.*+/#<>"): String = {
+    def generate(length: Int = 20, charsToInclude: String = "0-9 A-Z a-z -!.,*+/#<>%"): String = {
       val chars: String = charsToInclude.split(' ').toSeq.map {
           case s if s.size == 3 && s(1) == '-' => (s(0) to s(2)).mkString
           case s => s
         }.mkString
-      val xs: Seq[Char] = for (i <- 0 until length) yield { chars(rnd.nextInt(chars.size))}
+      def rndIndex() = rnd.nextInt(chars.size)
+      val xs: Seq[Char] = (0 until length).map(_ => chars(rndIndex()))
       xs.mkString
     }
   }

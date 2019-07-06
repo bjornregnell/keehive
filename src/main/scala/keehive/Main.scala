@@ -1,7 +1,7 @@
 package keehive
 
 object Main {
-  val version = "0.4"
+  val version = "0.5"
   val isHelp:    Set[String] = Set("-h", "?", "--help", "-help", "help")
   val isInstall: Set[String] = Set("--install", "-i")
   val isVault:   Set[String] = Set("--vault", "-v")
@@ -50,45 +50,48 @@ object Main {
   //TODO refactor corresponding functionality in AppController to here:
   def isUpdateAvailable: Boolean = latestVersion.nonEmpty && latestVersion != version
 
-  def install(): Unit = scala.util.Try {
+  def install(): Unit = {
+    val _ = scala.util.Try {
 
-    def createDir(dir: String): Unit =
-      if (Disk.createDirIfNotExist(dir)) println(s"Directory created: $dir")
+      def createDir(dir: String): Unit =
+        if (Disk.createDirIfNotExist(dir)) println(s"Directory created: $dir")
 
-    def download(source: String, dest: String): Unit = {
-      println(s"Downloading: $source\nOutfile: $dest")
-      Download.toBinaryFile(source, dest)
-    }
+      def download(source: String, dest: String): Unit = {
+        println(s"Downloading: $source\nOutfile: $dest")
+        Download.toBinaryFile(source, dest)
+      }
 
-    def isWindows: Boolean = System.getProperty("os.name").toLowerCase.contains("win")
+      def isWindows: Boolean = System.getProperty("os.name").toLowerCase.contains("win")
 
-    println(s"Keehive installer, current version: $version")
-    println(Seq("os.name", "os.version", "java.vm.name", "java.runtime.version").
-      map(System.getProperty).mkString(" "))
-    createDir(path)
-    Await.ready(latestVersionFuture, 5.seconds)
+      println(s"Keehive installer, current version: $version")
+      println(Seq("os.name", "os.version", "java.vm.name", "java.runtime.version").
+        map(System.getProperty).mkString(" "))
+      createDir(path)
+      println("Checking if latest version... ")
+      Await.ready(latestVersionFuture, 5.seconds)
 
-    if (latestVersion.nonEmpty) {
-      val v = latestVersion
-      println(s"\nAttempting installation of latest version $v in directory: $path")
-      createDir(s"$path/bin")
-      val jarFile = s"$path/bin/keehive-$v.jar"
-      if (!Disk.isExisting(jarFile)) {
-        download(source = s"$GitHubRelease/v$v/keehive-$v.jar", dest = jarFile)
-        val launcher = if (isWindows) "kh.bat" else "kh"
-        val launchCmd = if (isWindows) s"""java -jar $jarFile %*\n""" else  s"""java -jar $jarFile "$$@"\n"""
-        Disk.saveString(launchCmd, s"$path/bin/$launcher")
-        if (isWindows)
-          println(s"\nRun keehive by double-clicking on $path/bin/$launcher\nor write this in cmd or powershell:\n$launchCmd")
-        else {
-          scala.sys.process.Process(s"chmod +x $path/bin/$launcher").!  // make launcher executable
-          println(s"\nRun keehive using this command in terminal:\nsource $path/bin/$launcher")
-          println(s"\nTo install the kh command for keehive, enter this command in terminal:")
-          println(s"sudo ln -s $path/bin/$launcher /usr/local/bin")
-        }
-      } else println(s"\nError: File already exists: $jarFile")
-    } else println("\nError: Version info is not yet available. Check internet connection to https://github.com")
+      if (latestVersion.nonEmpty) {
+        val v = latestVersion
+        println(s"\nAttempting installation of latest version $v in directory: $path")
+        createDir(s"$path/bin")
+        val jarFile = s"$path/bin/keehive-$v.jar"
+        if (!Disk.isExisting(jarFile)) {
+          download(source = s"$GitHubRelease/v$v/keehive-$v.jar", dest = jarFile)
+          val launcher = if (isWindows) "kh.bat" else "kh"
+          val launchCmd = if (isWindows) s"""java -jar $jarFile %*\n""" else  s"""java -jar $jarFile "$$@"\n"""
+          Disk.saveString(launchCmd, s"$path/bin/$launcher")
+          if (isWindows)
+            println(s"\nRun keehive by double-clicking on $path/bin/$launcher\nor write this in cmd or powershell:\n$launchCmd")
+          else {
+            scala.sys.process.Process(s"chmod +x $path/bin/$launcher").!  // make launcher executable
+            println(s"\nRun keehive using this command in terminal:\nsource $path/bin/$launcher")
+            println(s"\nTo install the kh command for keehive, enter this command in terminal:")
+            println(s"sudo ln -s $path/bin/$launcher /usr/local/bin")
+          }
+        } else println(s"\nError: File already exists: $jarFile")
+      } else println("\nError: Version info is not yet available. Check internet connection to https://github.com")
 
-  }.recover{case e => println(s"Error: $e")}
+    }.recover{case e => println(s"Error: $e")}
+  }
 
 }

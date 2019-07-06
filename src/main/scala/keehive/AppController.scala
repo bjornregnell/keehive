@@ -108,19 +108,19 @@ object AppController {
   case class Cmd(cmd: String, exec: String => Unit, helpMsg: String= "")
 
   val commands = Vector(
-    Cmd("add",  addRecord),
-    Cmd("delete",  deleteRecord),
-    Cmd("edit", editRecord),
-    Cmd("genpw", copyPasswordToClipboard),
-    Cmd("list", listRecords(_, isShowAll = false)),
-    Cmd("show", listRecords(_, isShowAll = true)),
-    Cmd("print", _ => println(showAllRecordsAndFields)),
-    Cmd("copy", copyRecord),
+    Cmd("add",    addRecord),
+    Cmd("delete", deleteRecord),
+    Cmd("edit",   editRecord),
+    Cmd("genpw",  _ => copyNewPasswordToClipboard()),
+    Cmd("list",   listRecords(_, isShowAll = false)),
+    Cmd("show",   listRecords(_, isShowAll = true)),
+    Cmd("print",  _ => println(showAllRecordsAndFields)),
+    Cmd("copy",   copyRecord),
     Cmd("export", _ => exportAllToClipboard()),
     Cmd("import", _ => importFromClipboard()),
     Cmd("update", _ => checkForUpdateAndInstall()),
-    Cmd("help", help),
-    Cmd("quit", _ => Main.quit())
+    Cmd("help",   help),
+    Cmd("quit",   _ => Main.quit())
   )
 
   lazy val helpLines: Seq[String] = helpText.split('\n').toSeq
@@ -142,7 +142,7 @@ object AppController {
     else if (cmd.nonEmpty) {
       val firstFoundCmdOpt = commands.find(_.cmd == cmd)
       if (firstFoundCmdOpt.isDefined) firstFoundCmdOpt.get.exec(arg)
-      else Terminal.put(s"Unkown command: $cmd\nTry ? for help")
+      else Terminal.put(s"Unknown command: $cmd\nTry ? for help")
     }
 
   // --------------  Constants to access fields in Secrets ------------
@@ -220,8 +220,9 @@ object AppController {
     }
 
   def setCompletions(): Unit = {
-    val cmds = commands.map(_.cmd)
-    Terminal.setCompletions(cmds, vault.valuesOf(Id).filterNot(_.isEmpty))
+    val cs = commands.map(_.cmd)
+    val _: Boolean = //return value ignored
+      Terminal.setCompletions(cs, vault.valuesOf(Id).filterNot(_.isEmpty))
   }
 
   def userInput(fields: Seq[String], default: Map[String, String] = Map()): Map[String, String] = {
@@ -246,7 +247,7 @@ object AppController {
 
   def copyToClipboardAndNotify(s: String): Unit =  {
     Clipboard.put(s)
-    Terminal.put(s"${s.length} charachters copied to clipboard! Paste with Ctrl+V")
+    Terminal.put(s"${s.length} characters copied to clipboard! Paste with Ctrl+V")
   }
 
   def fixLine(line: String): String =
@@ -290,9 +291,9 @@ object AppController {
   }
 
   def generatePassword(): String = {
-    val length = Settings.getInt("generatePasswordLength").getOrElse(20)
+    val length = Settings.asInt("generatePasswordLength").getOrElse(20)
     val chars = Settings("generatePasswordChars").getOrElse("0-9 A-Z a-z")
-    //Terminal.put(s"Generating $length charachters that may include: $chars")
+    //Terminal.put(s"Generating $length characters that may include: $chars")
     //Terminal.put(s"Password generation settings in file: ${Settings.fileName}")
     Crypto.Password.generate(length, chars)
   }
@@ -380,8 +381,7 @@ object AppController {
     }
   }
 
-  def copyPasswordToClipboard(cmd: String): Unit = copyToClipboardAndNotify(generatePassword())
-
+  def copyNewPasswordToClipboard(): Unit = copyToClipboardAndNotify(generatePassword())
 
   def listRecords(arg: String, isShowAll: Boolean): Unit = {
     val fieldsToExclude = if (isShowAll) Seq() else SecretFields

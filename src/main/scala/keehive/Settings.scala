@@ -7,7 +7,7 @@ object Settings {
   val default: Map[String, String] = Map(
     "defaultUser"  -> System.getProperty("user.name"),
     "defaultEmail" -> "",
-    "generatePasswordChars"  -> "0-9 A-Z a-z *-.",
+    "generatePasswordChars"  -> "0-9 A-Z a-z !,.%",
     "generatePasswordLength" -> "20"
   )
 
@@ -17,20 +17,20 @@ object Settings {
   def apply(key: String): Option[String] = settings.get(key)
   def update(key: String, value: String): Unit = {
     settings = settings.updated(key,value)
-    save()
+    val _ = save()
   }
 
-  def getInt(key: String): Option[Int] = Try { settings(key).toInt } toOption
+  def asInt(key: String): Option[Int] = Try { settings(key).toInt } .toOption
 
   override def toString: String = settings.map{ case (k, v) => s"$k=$v"}.mkString("\n")
 
-  def save(): Unit = scala.util.Try {
+  def save() = Try {
     Disk.saveString(toString, fileName)
     Terminal.put(s"Settings saved to file: $fileName")
   } recover { case e => println(s"Error when saving settings: $e") }
 
-  def load(): Unit = {
-    scala.util.Try  {
+  def load() = {
+    Try {
       if (!Disk.isExisting(fileName)) {
         Terminal.put(s"No settings file found: $fileName")
         if (!Disk.isExisting(Main.path)) {

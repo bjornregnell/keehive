@@ -31,7 +31,7 @@ object Download {
       val input = connection.getInputStream
       val buffer = new Array[Byte](bufSize)
       var n: Int = input.read(buffer)
-      var tot: Long = n
+      var tot: Long = n.toLong
       while (n != -1){
           output.write(buffer, 0, n)
           onWrite(tot)

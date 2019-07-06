@@ -66,7 +66,9 @@ object AppController {
 
   val cmdPrompt     = "\nkeehive> "
   val mpwPrompt     = "Enter master password: "
+
   def readMasterPassword(msg: String = mpwPrompt): String = Terminal.getSecret("\n" + msg)
+  
   def abortIfUnableToVerifyMasterPassword(): Unit = {
     val verifyMpw = readMasterPassword("Verify Master Password:")
     if (verifyMpw != enteredMasterPassword) Main.abort("Entered passwords does not match.")

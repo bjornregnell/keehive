@@ -2,18 +2,21 @@ package keehive
 
 object Main {
   val version = "0.5"
+
   val isHelp:    Set[String] = Set("-h", "?", "--help", "-help", "help")
   val isInstall: Set[String] = Set("--install", "-i")
   val isVault:   Set[String] = Set("--vault", "-v")
+  val isCopy:    Set[String] = Set("--copy", "-c")
+
   val usageHelpMsg: String = s"""
     | Keehive terminal password manager version: $version
     |
     | args:
-    |   no args              launch keehive using default vault dir: ~/keehive
-    |   --vault [path]       launch keehive with specified path to vault dir
-    |   -v [path]            same as --vault [path]
-    |   --install [path]     install keehive, in optional path, default: ~/keehive
-    |   -i [path]            same as --install [path]
+    |   no args            launch keehive using default vault dir: ~/keehive
+    |   --vault [path]     launch keehive with specified path to vault dir
+    |   -v [path]          same as --vault [path]
+    |   --install [path]   install keehive, in optional path, default: ~/keehive
+    |   -i [path]          same as --install [path]
     """.stripMargin.trim
 
   val GitHubUrl     = "https://github.com/bjornregnell/keehive"

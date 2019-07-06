@@ -1,7 +1,9 @@
 *.class
 *.log
 
-# sbt specific
+.vscode
+
+# scala specific
 .metals
 .bloop
 .cache

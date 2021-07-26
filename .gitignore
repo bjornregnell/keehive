@@ -1,7 +1,12 @@
+*mpw.txt
+*vlt.txt
+settings.txt 
+
 *.class
 *.log
 
 .vscode
+metals.sbt
 
 # scala specific
 .metals

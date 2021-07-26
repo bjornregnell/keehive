@@ -17,11 +17,11 @@ object Vault {
   case class MasterCheck(isValid: Boolean, isCreated: Boolean, salt: String = "")
 
   def checkMasterPassword(file: String, mpw: String): MasterCheck = {
-    if (Disk.isExisting(file)) {
+    if Disk.isExisting(file) then {
       val encrypted = Disk.loadString(file)
       val Master(salt, saltedHash) =
         Crypto.AES.decryptObjectFromString[Master](encrypted, mpw).getOrElse(Master())
-      if (Crypto.SHA.hash(mpw + salt) == saltedHash)
+      if Crypto.SHA.hash(mpw + salt) == saltedHash then
         MasterCheck(isValid = true, isCreated = false, salt)
       else MasterCheck(isValid = false, isCreated = false)
     } else {
@@ -38,7 +38,7 @@ object Vault {
     val vaultFile = s"$path/$vaultFileName"
     val MasterCheck(isValid, isCreated, salt) =
       checkMasterPassword(mpwFile, masterPassword)
-    if (isValid) {
+    if isValid then {
       val vault = new Vault(masterPassword, mpwFile, vaultFile, salt)
       Result(Some(vault), isCreated)
     } else Result(None, isCreated = false)
@@ -68,10 +68,10 @@ class Vault private (
   }
 
   private def loadSecrets(): Secrets = {
-    if (Disk.isExisting(vaultFile)) {
+    if Disk.isExisting(vaultFile) then {
       val encrypted = Disk.loadString(vaultFile)
       val dataOpt: Option[Data] = Crypto.AES.decryptObjectFromString(encrypted, key)
-      if (dataOpt.isEmpty)
+      if dataOpt.isEmpty then
         Main.abort("Inconsistency between master password and encrypted vault!")
       val secretsOpt: Option[Secrets] = dataOpt.map(p => p.map{case (d,t) => Secret(d, t)})
       Terminal.put(s"Loaded ${secretsOpt.get.size} secrets.")
@@ -118,7 +118,7 @@ class Vault private (
   def removeValuesOfField(values: Seq[String], field: String): Unit = {
     values.foreach{ v =>
       var i = indexWhere(field, v)
-      while (i >= 0) {
+      while i >= 0 do {
         secrets.remove(i)
         i = indexWhere(field, v)
       }

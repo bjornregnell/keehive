@@ -57,7 +57,7 @@ object Main {
     val _ = scala.util.Try {
 
       def createDir(dir: String): Unit =
-        if (Disk.createDirIfNotExist(dir)) println(s"Directory created: $dir")
+        if Disk.createDirIfNotExist(dir) then println(s"Directory created: $dir")
 
       def download(source: String, dest: String): Unit = {
         println(s"Downloading: $source\nOutfile: $dest")
@@ -73,17 +73,17 @@ object Main {
       println("Checking if latest version... ")
       Await.ready(latestVersionFuture, 5.seconds)
 
-      if (latestVersion.nonEmpty) {
+      if latestVersion.nonEmpty then {
         val v = latestVersion
         println(s"\nAttempting installation of latest version $v in directory: $path")
         createDir(s"$path/bin")
         val jarFile = s"$path/bin/keehive-$v.jar"
-        if (!Disk.isExisting(jarFile)) {
+        if !Disk.isExisting(jarFile) then {
           download(source = s"$GitHubRelease/v$v/keehive-$v.jar", dest = jarFile)
-          val launcher = if (isWindows) "kh.bat" else "kh"
-          val launchCmd = if (isWindows) s"""java -jar $jarFile %*\n""" else  s"""java -jar $jarFile "$$@"\n"""
+          val launcher = if isWindows then "kh.bat" else "kh"
+          val launchCmd = if isWindows then s"""java -jar $jarFile %*\n""" else  s"""java -jar $jarFile "$$@"\n"""
           Disk.saveString(launchCmd, s"$path/bin/$launcher")
-          if (isWindows)
+          if isWindows then
             println(s"\nRun keehive by double-clicking on $path/bin/$launcher\nor write this in cmd or powershell:\n$launchCmd")
           else {
             scala.sys.process.Process(s"chmod +x $path/bin/$launcher").!  // make launcher executable

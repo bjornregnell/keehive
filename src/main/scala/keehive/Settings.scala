@@ -31,9 +31,9 @@ object Settings {
 
   def load() = {
     Try {
-      if (!Disk.isExisting(fileName)) {
+      if !Disk.isExisting(fileName) then {
         Terminal.put(s"No settings file found: $fileName")
-        if (!Disk.isExisting(Main.path)) {
+        if !Disk.isExisting(Main.path) then {
           Terminal.put(s"No keehive directory found: ${Main.path}")
           Disk.createDirIfNotExist(Main.path)
           Terminal.put(s"Directory created: ${Main.path}")

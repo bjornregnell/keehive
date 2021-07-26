@@ -71,7 +71,7 @@ object AppController {
   
   def abortIfUnableToVerifyMasterPassword(): Unit = {
     val verifyMpw = readMasterPassword("Verify Master Password:")
-    if (verifyMpw != enteredMasterPassword) Main.abort("Entered passwords does not match.")
+    if verifyMpw != enteredMasterPassword then Main.abort("Entered passwords does not match.")
   }
 
   // --------------- Command Control ----------------------
@@ -84,9 +84,9 @@ object AppController {
     enteredMasterPassword = readMasterPassword()
 
     val Vault.Result(vaultOpt, isCreated) = Vault.open(enteredMasterPassword, Main.path)
-    if (vaultOpt.isDefined) {
+    if vaultOpt.isDefined then {
       vault = vaultOpt.get
-      if (isCreated) notifyMpwCreated() else notifyMpwGood()
+      if isCreated then notifyMpwCreated() else notifyMpwGood()
       setCompletions()
       notifyIfUpdateAvailable()
       cmdLoop()
@@ -96,7 +96,7 @@ object AppController {
   @annotation.tailrec
   final def cmdLoop(): Unit = {
     val cmdLine = Terminal.get(cmdPrompt)
-    if (cmdLine == Terminal.CtrlD) Main.quit()
+    if cmdLine == Terminal.CtrlD then Main.quit()
     val (cmd, arg) = cmdArg(cmdLine)
     doCmd(cmd, arg)
     cmdLoop()
@@ -136,14 +136,14 @@ object AppController {
     arg.split(' ').toVector.map(_.trim).filterNot(_.isEmpty)
 
   def help(arg: String = ""): Unit =
-    if (arg == "") Terminal.put(helpText)
+    if arg == "" then Terminal.put(helpText)
     else splitArg(arg).foreach(arg => Terminal.put(helpCmd(arg)))
 
   def doCmd(cmd: String, arg: String): Unit =
-    if (cmd == "?") help(arg)
-    else if (cmd.nonEmpty) {
+    if cmd == "?" then help(arg)
+    else if cmd.nonEmpty then {
       val firstFoundCmdOpt = commands.find(_.cmd == cmd)
-      if (firstFoundCmdOpt.isDefined) firstFoundCmdOpt.get.exec(arg)
+      if firstFoundCmdOpt.isDefined then firstFoundCmdOpt.get.exec(arg)
       else Terminal.put(s"Unknown command: $cmd\nTry ? for help")
     }
 
@@ -184,7 +184,7 @@ object AppController {
   def randomStr(n: Int = 8): String = java.util.UUID.randomUUID().toString.take(n)
   def randomId(): String = {
     var rid = randomStr()
-    while (vault.isExisting(field = Id, value = rid)) rid = randomStr()
+    while vault.isExisting(field = Id, value = rid) do rid = randomStr()
     rid
   }
 
@@ -204,20 +204,20 @@ object AppController {
 
   def showRecordById(id: String, fieldsToExclude: Seq[String]): Unit = {
     val i = vault.indexStartsWith(field = Id, valueStartsWith = id)
-    if (i >= 0) Terminal.put(vault(i).showLines(FieldsInOrder, fieldsToExclude))
+    if i >= 0 then Terminal.put(vault(i).showLines(FieldsInOrder, fieldsToExclude))
     else notifyRecordNotFound()
   }
 
   def showRecordByIndex(ix: Int, fieldsToExclude: Seq[String]): Unit =
-    if (ix >= 0 && ix < vault.size)
+    if ix >= 0 && ix < vault.size then
       Terminal.put(vault(ix).showLines(FieldsInOrder, fieldsToExclude))
     else notifyIndexNotFound()
 
   def listRange(fromIndex: Int, untilIndex: Int, fieldsToExclude: Seq[String]): Unit =
-    for (i <- fromIndex until untilIndex) {
+    for i <- fromIndex until untilIndex do {
       val maybeTooLongString = vault(i).show(FieldsInOrder, fieldsToExclude)
       val showString =  maybeTooLongString.take(MaxLineLength)
-      val continued = if (maybeTooLongString.length > MaxLineLength) "..." else ""
+      val continued = if maybeTooLongString.length > MaxLineLength then "..." else ""
       Terminal.put(s"[$i]  $showString$continued")
     }
 
@@ -233,12 +233,12 @@ object AppController {
       val prompt = s"$field:$pad"
 
       val input =
-        if (SecretFields contains field) Terminal.getSecret(prompt)
+        if SecretFields contains field then Terminal.getSecret(prompt)
         else Terminal.get(prompt, default.getOrElse(field,""))
 
-      val value = if (input == Terminal.CtrlD) "" else {
-        if (field == Pw && input == "") {
-          if (Terminal.isOk("Generate new password? ENTER=no "))
+      val value = if input == Terminal.CtrlD then "" else {
+        if field == Pw && input == "" then {
+          if Terminal.isOk("Generate new password? ENTER=no ") then
             generatePassword()
           else default.getOrElse(Pw,"")
         } else input
@@ -253,7 +253,7 @@ object AppController {
   }
 
   def fixLine(line: String): String =
-    if (line contains ':') line
+    if line contains ':' then line
     else {
       val r = randomStr()
       Terminal.put(s"\n*** [warn] random field name ?$r added as colon is missing in line:\n$line\n")
@@ -271,22 +271,22 @@ object AppController {
     val kvs: Map[String, String] = xs.map(fixPair).collect {
       case (k,v) if !v.isEmpty => (k.trim,v.trim)
     }.toMap
-    def kvsWithId = if (!kvs.isDefinedAt(Id)) kvs + (Id -> randomStr()) else kvs
-    if (kvs.nonEmpty) Some(Secret(kvsWithId)) else None
+    def kvsWithId = if !kvs.isDefinedAt(Id) then kvs + (Id -> randomStr()) else kvs
+    if kvs.nonEmpty then Some(Secret(kvsWithId)) else None
   }
 
   def notifyIfUpdateAvailable(): Unit = {
 
     def isFirstVersionGreater(vs: Seq[(String, String)]): Boolean =
-      if (vs.nonEmpty) {
+      if vs.nonEmpty then {
         val (first, second) = (toIntOpt(vs.head._1).getOrElse(0), toIntOpt(vs.head._2).getOrElse(0))
-        if (first == second) isFirstVersionGreater(vs.drop(1))
+        if first == second then isFirstVersionGreater(vs.drop(1))
         else first > second
       } else false
 
-    if (Main.latestVersion.nonEmpty) {
+    if Main.latestVersion.nonEmpty then {
       val vs = Main.latestVersion.split('.') zip Main.version.split('.')
-      if (isFirstVersionGreater(vs.toIndexedSeq)) {
+      if isFirstVersionGreater(vs.toIndexedSeq) then {
         Terminal.put(s"Keehive version ${Main.latestVersion} is available. Type 'update' to install.")
       }
     }
@@ -304,12 +304,12 @@ object AppController {
 
   def addRecord(arg: String): Unit = {
     val args = splitArg(arg)
-    val idMaybe = if (args.nonEmpty) args.head else Terminal.get(Id + ": ")
+    val idMaybe = if args.nonEmpty then args.head else Terminal.get(Id + ": ")
     val id = idMaybe.takeWhile(_ != ' ')
-    if (id != idMaybe) notifyIdMustBeOneWord()
-    else if (isInt(id)) notifyIdCannotBeInteger()
+    if id != idMaybe then notifyIdMustBeOneWord()
+    else if isInt(id) then notifyIdCannotBeInteger()
     else {
-      if (!vault.isExisting(field = Id, value = id)) {
+      if !vault.isExisting(field = Id, value = id) then {
         val xs = userInput(EnterFields) + (Id -> id)
         val n = vault.add(Secret(xs))
         Terminal.put(s"New secret at last index: ${n - 1}")
@@ -324,8 +324,8 @@ object AppController {
 
       case Seq(ix) if isInt(ix) =>
         val i = ix.toInt
-        if (i >= 0 && i < vault.size) {
-          if (Terminal.isOk(s"Are you sure that you want to delete [$i]")) {
+        if i >= 0 && i < vault.size then {
+          if Terminal.isOk(s"Are you sure that you want to delete [$i]") then {
             vault.remove(i)
             setCompletions()
             Terminal.put(s"Record at old index [$i] removed.")
@@ -334,9 +334,9 @@ object AppController {
 
       case Seq(ix1, ix2) if isInt(ix1) && isInt(ix2) =>
         val (start, end) = (ix1.toInt, ix2.toInt)
-        if (start >= 0 && start < vault.size && end > start && end < vault.size) {
+        if start >= 0 && start < vault.size && end > start && end < vault.size then {
           val n = end - start + 1
-          if (Terminal.isOk(s"Are you sure that you want to delete $n records at [$start-$end]")) {
+          if Terminal.isOk(s"Are you sure that you want to delete $n records at [$start-$end]") then {
             vault.remove(start, n)
             setCompletions()
             Terminal.put(s"Record at old indices [$start-$end] removed.")
@@ -345,8 +345,8 @@ object AppController {
 
       case Seq(id) =>
         val i = vault.indexWhere(field = Id, value = id)
-        if (i < 0) notifyRecordNotFound()
-        else if (Terminal.isOk(s"Are you sure that you want to delete id:$id")) {
+        if i < 0 then notifyRecordNotFound()
+        else if Terminal.isOk(s"Are you sure that you want to delete id:$id") then {
           vault.remove(i)
           setCompletions()
           Terminal.put(s"Record at old index [$i] with id:$id removed.")
@@ -361,19 +361,19 @@ object AppController {
       case Seq() => Terminal.put(s"Give index or id as argument!")
 
       case args if args.size <= 2 =>
-        val i = if (isInt(args.head)) args.head.toInt
+        val i = if isInt(args.head) then args.head.toInt
                 else vault.indexWhere(field = Id, value = args.head)
-        if (i >= 0 && i < vault.size) {
+        if i >= 0 && i < vault.size then {
           val id = vault(i).get(Id)
           Terminal.put(s"Edit record with id:$id\n")
           val default = vault(i).data
           val fieldsToEdit: Seq[String] =
-            if (args.size > 1) args.drop(1)
+            if args.size > 1 then args.drop(1)
             else (vault(i).data.keySet - OldPw - Id).toSeq
           val edited = userInput(fieldsToEdit, default) + (Id -> id)
           val (enteredPw, existingPw) = (edited.getOrElse(Pw, ""), vault(i).get(Pw))
           val appendOldPwMap: Map[String, String] =
-            if (enteredPw != existingPw) Map(OldPw -> existingPw) else Map()
+            if enteredPw != existingPw then Map(OldPw -> existingPw) else Map()
           vault(i) = Secret(vault(i).data ++ edited ++ appendOldPwMap)
           Terminal.put(s"\nEdited record with id:$id")
           listRecords(i.toString, isShowAll = false)
@@ -386,7 +386,7 @@ object AppController {
   def copyNewPasswordToClipboard(): Unit = copyToClipboardAndNotify(generatePassword())
 
   def listRecords(arg: String, isShowAll: Boolean): Unit = {
-    val fieldsToExclude = if (isShowAll) Seq() else SecretFields
+    val fieldsToExclude = if isShowAll then Seq() else SecretFields
     splitArg(arg) match {
       case Seq() => listRange(0, vault.size, fieldsToExclude)
       case Seq(ix) if isInt(ix) => showRecordByIndex(ix.toInt, fieldsToExclude)
@@ -405,9 +405,9 @@ object AppController {
 
       case args if args.size <= 2 =>
         val fieldToCopy = args.lift(1).getOrElse(Pw)
-        val i = if (isInt(args.head)) args.head.toInt
+        val i = if isInt(args.head) then args.head.toInt
                 else vault.indexStartsWith(field = Id, valueStartsWith = args.head)
-        if (i >= 0 && i < vault.size) copyToClipboardAndNotify(vault(i).get(fieldToCopy))
+        if i >= 0 && i < vault.size then copyToClipboardAndNotify(vault(i).get(fieldToCopy))
         else notifyRecordNotFound()
 
       case _ => Terminal.put(s"Too many arguments: $arg")
@@ -423,16 +423,16 @@ object AppController {
     val newIds = fields.toSet[Secret].map(s => s.get(Id))
     val existingIds = vault.toSet.map(s => s.get(Id))
     val duplicates = newIds intersect existingIds
-    if (duplicates.nonEmpty) {
+    if duplicates.nonEmpty then {
       Terminal.put("\n *** WARNING! Duplicate ids detected: " + duplicates.mkString(", "))
-      if (Terminal.isOk("Do you want to remove all these ids in vault before importing?")) {
+      if Terminal.isOk("Do you want to remove all these ids in vault before importing?") then {
         vault.removeValuesOfField(duplicates.toSeq, Id)
       } else Terminal.put("Duplicates kept in vault.")
     }
     val pairs = fields.map(s => (s.get(Id), s))
     val distinctPairs = pairs.toMap.toSeq
-    if (pairs.size != distinctPairs.size) {
-      if (Terminal.isOk("Duplicates among import detected. Keep last in sequence?"))
+    if pairs.size != distinctPairs.size then {
+      if Terminal.isOk("Duplicates among import detected. Keep last in sequence?") then
         distinctPairs.map(_._2)
       else fields
     } else fields
@@ -444,7 +444,7 @@ object AppController {
     val fields = items.filterNot(_.isEmpty).flatMap(parseFields)
     val n = fields.size
     Terminal.put(fields.map(_.get("id")).mkString(", "))
-    if (Terminal.isOk(s"Do you want to append the $n records to your vault?")) {
+    if Terminal.isOk(s"Do you want to append the $n records to your vault?") then {
       val fieldsToAppend = checkForDuplicates(fields)
       vault.add(fieldsToAppend:_*)
       setCompletions()
@@ -452,9 +452,9 @@ object AppController {
   }
 
   def checkForUpdateAndInstall(): Unit =
-    if (Main.latestVersion.nonEmpty) {
-      if (Main.latestVersion != Main.version) {
-        if (Terminal.isOk(s"Version ${Main.latestVersion} is available. Download and install?"))
+    if Main.latestVersion.nonEmpty then {
+      if Main.latestVersion != Main.version then {
+        if Terminal.isOk(s"Version ${Main.latestVersion} is available. Download and install?") then
           Main.install()
         else Terminal.put("Installation aborted.")
       } else Terminal.put(s"Already up to date! Current version of keehive is ${Main.version}")

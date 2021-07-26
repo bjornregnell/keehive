@@ -10,7 +10,7 @@ object Disk {
   def createFileIfNotExist(fileName: String): Boolean = {
       val file = new java.io.File(fileName)
       var isCreated = false
-      if (!file.exists) {
+      if !file.exists then {
         file.getParentFile.mkdirs()
         isCreated = file.createNewFile()
       }

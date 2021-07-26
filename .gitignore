@@ -11,6 +11,7 @@ metals.sbt
 # scala specific
 .metals
 .bloop
+.bsp
 .cache
 .history
 .lib/

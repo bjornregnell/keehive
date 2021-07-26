@@ -17,7 +17,7 @@ object AppController {
     | Press TAB for completion.
     | Press Ctrl+L to clear screen.
     |
-    | Built with Scala ${util.Properties.versionNumberString} running on:
+    | Built with Scala 3 using stdlib ${util.Properties.versionNumberString} running on:
     | ${System.getProperty("java.vm.name")} ${System.getProperty("java.version")}
     |
     |********************************************
@@ -238,7 +238,7 @@ object AppController {
 
       val value = if (input == Terminal.CtrlD) "" else {
         if (field == Pw && input == "") {
-          if (Terminal.isOk("Generate new password?"))
+          if (Terminal.isOk("Generate new password? ENTER=no "))
             generatePassword()
           else default.getOrElse(Pw,"")
         } else input

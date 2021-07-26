@@ -1,7 +1,7 @@
 package keehive
 
 object Main {
-  val version = "0.5"
+  val version = "0.6"
 
   val isHelp:    Set[String] = Set("-h", "?", "--help", "-help", "help")
   val isInstall: Set[String] = Set("--install", "-i")

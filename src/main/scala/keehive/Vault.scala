@@ -90,7 +90,7 @@ class Vault private (
   def toSet: Set[Secret] = secrets.toSet
   def apply(index: Int): Secret = secrets(index)
   def size: Int = secrets.size
-  def valuesOf(field: String): Seq[String] = secrets.map(s => s.get(field))
+  def valuesOf(field: String): Seq[String] = secrets.map(s => s.get(field)).toSeq
   def isExisting(field: String, value: String): Boolean = valuesOf(field) contains value
 
   def indexOf(field: String, value: String): Int = valuesOf(field) indexOf value

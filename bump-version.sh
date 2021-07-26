@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo -n "Enter new version number: "
+echo -n "Enter new version number, e.g. 0.7: "
 read vers
 
 echo "$vers" | cat >version.txt

@@ -1,6 +1,6 @@
 package keehive
 
-object Settings {
+object Settings:
   import scala.util.Try
 
   val fileName = Main.path +"/settings.txt"
@@ -15,10 +15,9 @@ object Settings {
 
   def toMap: Map[String, String] = settings
   def apply(key: String): Option[String] = settings.get(key)
-  def update(key: String, value: String): Unit = {
+  def update(key: String, value: String): Unit =
     settings = settings.updated(key,value)
     val _ = save()
-  }
 
   def asInt(key: String): Option[Int] = Try { settings(key).toInt } .toOption
 
@@ -29,17 +28,16 @@ object Settings {
     Terminal.put(s"Settings saved to file: $fileName")
   } recover { case e => println(s"Error when saving settings: $e") }
 
-  def load() = {
+  def load() =
     Try {
-      if !Disk.isExisting(fileName) then {
+      if !Disk.isExisting(fileName) then
         Terminal.put(s"No settings file found: $fileName")
-        if !Disk.isExisting(Main.path) then {
+        if !Disk.isExisting(Main.path) then
           Terminal.put(s"No keehive directory found: ${Main.path}")
           Disk.createDirIfNotExist(Main.path)
           Terminal.put(s"Directory created: ${Main.path}")
-        }
         save()
-      } else
+      else
       Terminal.put(s"Loading settings from file: $fileName")
       val lines = Disk.loadLines(fileName).filter(_.nonEmpty)
       val mappings: Seq[Seq[String]] = lines.map(_.split('=').toSeq)
@@ -48,6 +46,4 @@ object Settings {
       }
       Terminal.put(s"Loaded settings: $settings")
     } recover { case e => Terminal.put(s"Error when loading settings: $e") }
-  }
 
-}

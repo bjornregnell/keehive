@@ -34,7 +34,7 @@ package keehive
 //   }
 // }
 
-object Terminal {
+object Terminal:
     //https://github.com/jline/jline3/wiki
     //https://search.maven.org/artifact/org.jline/jline
   import org.jline.terminal.TerminalBuilder
@@ -61,7 +61,7 @@ object Terminal {
 
   def removeCompletions(): Unit = reader.setCompleter(null)
   
-  def setCompletions(first: Seq[String], second: Seq[String]): Boolean = {
+  def setCompletions(first: Seq[String], second: Seq[String]): Boolean =
     removeCompletions()
     val sc1 = new StringsCompleter(first: _*)
     val sc2 = new StringsCompleter(second: _*)
@@ -69,6 +69,4 @@ object Terminal {
     reader.setCompleter(ac)
     
     true  // to be compatible with old readline which used to return if ok
-  }
 
-}

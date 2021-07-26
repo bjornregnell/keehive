@@ -2,7 +2,7 @@ package keehive
 
 object Vault {
   case class Master(salt: String = "", saltedHash: String = "")
-  val username: String = System.getProperty("user.name")
+  val username: String = Settings("defaultUser").getOrElse(System.getProperty("user.name"))
   final val mpwFileName   = s"$username-mpw.txt"
   final val vaultFileName = s"$username-vlt.txt"
 
@@ -47,7 +47,7 @@ object Vault {
 
 class Vault private (
         initMasterPassword: String,
-        masterPasswordFile: String,
+        masterPasswordFile: String,  // TODO used when impl. change mpw
         vaultFile:          String,
         private var salt:   String){
 
@@ -56,8 +56,8 @@ class Vault private (
   type Secrets = ArrayBuffer[Secret]
   type Data = ArrayBuffer[(Map[String,String], Long)]
 
-  private var mpw = initMasterPassword
-  private var secrets: Secrets = loadSecrets()
+  private var mpw = initMasterPassword  // TODO change master password
+  private val secrets: Secrets = loadSecrets()
   private def key = mpw + salt
 
   private def saveSecrets(ss: Secrets): Unit = {

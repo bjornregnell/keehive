@@ -286,7 +286,7 @@ object AppController {
 
     if (Main.latestVersion.nonEmpty) {
       val vs = Main.latestVersion.split('.') zip Main.version.split('.')
-      if (isFirstVersionGreater(vs)) {
+      if (isFirstVersionGreater(vs.toIndexedSeq)) {
         Terminal.put(s"Keehive version ${Main.latestVersion} is available. Type 'update' to install.")
       }
     }
@@ -377,7 +377,7 @@ object AppController {
           vault(i) = Secret(vault(i).data ++ edited ++ appendOldPwMap)
           Terminal.put(s"\nEdited record with id:$id")
           listRecords(i.toString, isShowAll = false)
-        } else notifyRecordNotFound
+        } else notifyRecordNotFound()
 
       case _ => Terminal.put(s"Too many arguments: $arg")
     }
@@ -408,7 +408,7 @@ object AppController {
         val i = if (isInt(args.head)) args.head.toInt
                 else vault.indexStartsWith(field = Id, valueStartsWith = args.head)
         if (i >= 0 && i < vault.size) copyToClipboardAndNotify(vault(i).get(fieldToCopy))
-        else notifyRecordNotFound
+        else notifyRecordNotFound()
 
       case _ => Terminal.put(s"Too many arguments: $arg")
     }
@@ -416,7 +416,7 @@ object AppController {
 
   def exportAllToClipboard(): Unit = {
     Clipboard.put(showAllRecordsAndFields)
-    Terminal.put(vault.size + " records copied to clipboard.")
+    Terminal.put(s"${vault.size} records copied to clipboard.")
   }
 
   def checkForDuplicates(fields: Seq[Secret] ): Seq[Secret] = {
@@ -440,7 +440,7 @@ object AppController {
   }
 
   def importFromClipboard(): Unit = {
-    val items = Clipboard.get.split("\n\n").toSeq
+    val items = Clipboard.get().split("\n\n").toSeq
     val fields = items.filterNot(_.isEmpty).flatMap(parseFields)
     val n = fields.size
     Terminal.put(fields.map(_.get("id")).mkString(", "))

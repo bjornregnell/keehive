@@ -46,6 +46,7 @@ object Settings {
       mappings.collect {
         case Seq(key, value) => settings = settings.updated(key.trim, value.trim)
       }
+      Terminal.put(s"Loaded settings: $settings")
     } recover { case e => Terminal.put(s"Error when loading settings: $e") }
   }
 

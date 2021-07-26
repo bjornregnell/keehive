@@ -1,7 +1,8 @@
 package keehive
 
 object Download {
-  def asString(url: String): String = scala.io.Source.fromURL(url).getLines.mkString("\n")
+  def asString(url: String): String = 
+    scala.io.Source.fromURL(url).getLines().mkString("\n")
 
   def toTextFile(url: String, fileName: String, enc: String = "UTF-8"): Unit = {
     val s = asString(url)

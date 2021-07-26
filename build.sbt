@@ -27,3 +27,5 @@ libraryDependencies += "org.jline" % "jline" % "3.20.0"
 fork                :=true
 connectInput        :=true
 outputStrategy      := Some(StdoutOutput)
+
+ThisBuild / useSuperShell := false

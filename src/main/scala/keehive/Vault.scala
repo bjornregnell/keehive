@@ -2,9 +2,6 @@ package keehive
 
 object Vault:
   case class Master(salt: String = "", saltedHash: String = "")
-  val username: String = Settings("defaultUser").getOrElse(System.getProperty("user.name"))
-  final val mpwFileName   = s"$username-mpw.txt"
-  final val vaultFileName = s"$username-vlt.txt"
 
   def saveMasterPassword(file: String, mpw: String): String =
     val salt = Crypto.Salt.next
@@ -30,9 +27,11 @@ object Vault:
 
   case class Result(valtOpt: Option[Vault], isCreated: Boolean)
 
-  def open(masterPassword: String, path: String): Result =
-    val mpwFile   = s"$path/$mpwFileName"
-    val vaultFile = s"$path/$vaultFileName"
+  def open(user: String, masterPassword: String, path: String): Result =
+    val mpwFile   = s"$path/$user-mpw.txt"
+    val vaultFile = s"$path/$user-vlt.txt"
+    Terminal.put(s"Master password file: $mpwFile")
+    Terminal.put(s"          Vault file: $vaultFile")
     val MasterCheck(isValid, isCreated, salt) =
       checkMasterPassword(mpwFile, masterPassword)
     if isValid then
@@ -71,7 +70,7 @@ class Vault private (
       Terminal.put(s"Loaded ${secretsOpt.get.size} secrets.")
       secretsOpt.get
     else
-      Terminal.put("No vault found - empty vault will be created after verification.")
+      Terminal.put("No vault found. Empty vault will be created after verification.")
       AppController.abortIfUnableToVerifyMasterPassword()
       val emptySecrets: Secrets = ArrayBuffer.empty
       Terminal.put(s"Creating new empty vault.")

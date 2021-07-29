@@ -64,25 +64,38 @@ object AppController:
     |update    check for new versions of keehive, download and install
     """.stripMargin
 
-  val cmdPrompt     = "\nkeehive> "
-  val mpwPrompt     = "Enter master password: "
+  val cmdPrompt = "\nkeehive> "
+  val mpwPrompt = "Enter master password: "
 
   def readMasterPassword(msg: String = mpwPrompt): String = Terminal.getSecret("\n" + msg)
   
   def abortIfUnableToVerifyMasterPassword(): Unit =
-    val verifyMpw = readMasterPassword("Verify Master Password:")
-    if verifyMpw != enteredMasterPassword then Main.abort("Entered passwords does not match.")
+    val verifyMpw = readMasterPassword(" Enter password again: ")
+    if verifyMpw != lastEnteredMasterPassword 
+    then Main.abort("Entered passwords does not match.")
+    else ()
+
+  // ----------------- mutable attributes ------------------------------
+
+  private var vault: Vault                  = scala.compiletime.uninitialized
+  private var userName: String              = scala.compiletime.uninitialized 
+  private var enteredMasterPassword: String = scala.compiletime.uninitialized
+  def lastEnteredMasterPassword = enteredMasterPassword
 
   // --------------- Command Control ----------------------
-
 
   def start(): Unit  =
     Terminal.put(welcomeBanner)
     Terminal.put(s"Vault directory: $canonicalPath")
     Settings.load()
+    userName = 
+      Terminal.get("\nEnter username: ", 
+        default = Settings("defaultUser").getOrElse(System.getProperty("user.name")))
+    if userName == Terminal.CtrlD then Main.quit()
     enteredMasterPassword = readMasterPassword()
-
-    val Vault.Result(vaultOpt, isCreated) = Vault.open(enteredMasterPassword, Main.path)
+    if enteredMasterPassword == Terminal.CtrlD then Main.quit()
+    val Vault.Result(vaultOpt, isCreated) = 
+      Vault.open(user = userName, masterPassword = enteredMasterPassword, path = Main.path)
     if vaultOpt.isDefined then
       vault = vaultOpt.get
       if isCreated then notifyMpwCreated() else notifyMpwGood()
@@ -156,7 +169,7 @@ object AppController:
   // ---------------  Notifications to user ----------------------------
 
   def notifyMpwCreated(): Unit = Terminal.put("New master password file created.")
-  def notifyMpwGood(): Unit = Terminal.put("Your vault is open!")
+  def notifyMpwGood(): Unit = Terminal.put("Your vault is open! Make sure no one is peeking!")
   def notifySaveVault(n: Int): Unit = Terminal.put(s"Saving $n secrets in vault.")
   def abortMpwBad(): Unit = Main.abort("Bad master password :( ACCESS DENIED!")
   def notifyIdExists(): Unit = Terminal.put(s"That $Id already exists; pick another.")
@@ -164,12 +177,6 @@ object AppController:
   def notifyIndexNotFound(): Unit = Terminal.put(s"Index out of bounds.")
   def notifyIdMustBeOneWord(): Unit = Terminal.put(s"$Id must be one word.")
   def notifyIdCannotBeInteger(): Unit = Terminal.put(s"$Id cannot be integer.")
-
-  // ----------------- mutable attributes ------------------------------
-
-  private var enteredMasterPassword: String = _
-  def lastEnteredMasterPassword = enteredMasterPassword
-  private var vault: Vault = _
 
   // ----------------- utilities --------------------------------------
 

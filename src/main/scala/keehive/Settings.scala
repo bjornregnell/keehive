@@ -6,7 +6,6 @@ object Settings:
   val fileName = Main.path +"/settings.txt"
   val default: Map[String, String] = Map(
     "defaultUser"  -> System.getProperty("user.name"),
-    "defaultEmail" -> "",
     "generatePasswordChars"  -> "0-9 A-Z a-z !,.%",
     "generatePasswordLength" -> "20"
   )
